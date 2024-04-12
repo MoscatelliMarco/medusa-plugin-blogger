@@ -1,5 +1,3 @@
-import React from "react"
-
 const ArticleItem = (props) => {
     return (
         <div className="flex flex-col gap-1 p-2.5 bg-white rounded">

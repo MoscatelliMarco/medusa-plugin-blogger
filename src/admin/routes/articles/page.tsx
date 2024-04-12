@@ -4,13 +4,13 @@ import ArticleItem from "../../../ui-components/article_item";
 
 const ArticlePage = () => {
   return (
-    <div className="flex flex-col gap-9">
+    <div className="flex flex-col gap-7">
 
         <div className="flex justify-between items-center">
-            <button className="px-3 py-2 rounded bg-green-500 text-white font-medium flex gap-3 items-center">
+            <a href="/a/article-editor" className="px-3 py-2 rounded bg-green-500 text-white font-medium flex gap-3 items-center">
                 <ArchiveBox/>
                 New article
-            </button>
+            </a>
             <div className="flex items-center gap-2">
                 <div className="px-3 py-2 flex gap-2 items-center text-white bg-blue-500 rounded font-medium">
                     <TrianglesMini />
