@@ -1,5 +1,3 @@
-import { InformationCircle } from "@medusajs/icons"
-
 const ArticleEditorPage = () => {
   return (
     <div className="flex flex-col gap-4">
