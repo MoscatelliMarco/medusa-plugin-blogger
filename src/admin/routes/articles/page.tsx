@@ -1,16 +1,17 @@
 import { RouteConfig } from "@medusajs/admin"
 import { DocumentSeries, ArchiveBox, MagnifyingGlass, Funnel, TrianglesMini } from "@medusajs/icons"
 import ArticleItem from "../../../ui-components/article_item";
+import { Link } from "react-router-dom";
 
 const ArticlePage = () => {
   return (
     <div className="flex flex-col gap-7">
 
         <div className="flex justify-between items-center">
-            <a href="/a/article-editor" className="px-3 py-2 rounded bg-green-500 text-white font-medium flex gap-3 items-center">
+            <Link to="/a/article-editor" className="px-3 py-2 rounded bg-green-500 text-white font-medium flex gap-3 items-center">
                 <ArchiveBox/>
                 New article
-            </a>
+            </Link>
             <div className="flex items-center gap-2">
                 <div className="px-3 py-2 flex gap-2 items-center text-white bg-blue-500 rounded font-medium">
                     <TrianglesMini />

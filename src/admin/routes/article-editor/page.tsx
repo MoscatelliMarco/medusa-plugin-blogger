@@ -1,16 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import Tagify from '@yaireo/tagify'
 import DragSort from "@yaireo/dragsort"
-import TagStyle from '../../../css/tagify'
-import Quill from 'quill'
-import QuillJsStyle from '../../../css/quilljs'
+import TagStyle from '../../../css/tags'
+import EditorStyle from '../../../css/editor'
+import  { SimpleMdeReact } from "react-simplemde-editor";
 
 const ArticleEditorPage = () => {
     useEffect(() => {
         // Tags logic
-        var inputElem = document.querySelector('#tags')
-        var tagify = new Tagify(inputElem, {})
-        var dragsort = new DragSort(tagify.DOM.scope, {
+        const inputElem = document.querySelector('#tags')
+        const tagify = new Tagify(inputElem, {})
+        new DragSort(tagify.DOM.scope, {
             selector:'.'+tagify.settings.classNames.tag,
             callbacks: {
                 dragEnd: onDragEnd
@@ -20,17 +20,33 @@ const ArticleEditorPage = () => {
             tagify.updateValueByDOMTags()
         }
 
+
+        const toolbarOptions = [
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+            ['blockquote', 'code-block'],
+            ['link', 'image'],
+          
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+          
+            ['clean']                                         // remove formatting button
+        ];
         // Editor logic
-        const quill = new Quill('#editor', {
-            theme: 'snow'
-        });
+        // new SimpleMDE({ element: document.getElementById("#editor") });
     }, [])
+
+    let editorBody = "";
+    const onChangeEditor = useCallback((value: string) => {
+        editorBody = value;
+        console.log(editorBody)
+    }, []);
 
     return (
         <div className="flex flex-col gap-4">
 
             <TagStyle />
-            <QuillJsStyle />
+            <EditorStyle />
 
             <h1 className="text-3xl font-semibold text-gray-700 mb-3">Blog editor</h1>
 
@@ -54,9 +70,42 @@ const ArticleEditorPage = () => {
                 </div>
             </div>
             <div className="w-full h-[1px] bg-gray-300 mt-4 mb-2.5"></div>
-            <div className="flex flex-col">
-                <label htmlFor="body" className="font-medium text-gray-700 mr-1">Body</label>
-                <div id='editor'></div>
+            <div className="flex flex-col gap-0.5">
+                <label htmlFor="editor" className="font-medium text-gray-700 mr-1">Body</label>
+                <div id='editor'>
+                    {/* 
+                        TODO change codeMirro class to have bg transparent 
+                        TODO change word correction to false
+                    */}
+                    <SimpleMdeReact onChange={onChangeEditor} options = {{
+                        unorderedListStyle: "-",
+                        previewImagesInEditor: true,
+                        minHeight: "400px",
+                        placeholder: "Body",
+                        // uploadImage: true
+                    }}/>
+                </div>
+                <style>
+                    {
+                        `
+                        #editor ul li {
+                            list-style: disc !important;
+                            margin-left: 20px;
+                        }
+                        #editor ol li {
+                            list-style: decimal !important;
+                            margin-left: 20px;
+                        }
+                        #editor a {
+                            text-decoration-line: underline;
+                            color: blue;
+                        }
+                        #editor a:visited {
+                            color: purple;
+                        }
+                        `
+                    }
+                </style>
             </div>
 
         </div>
