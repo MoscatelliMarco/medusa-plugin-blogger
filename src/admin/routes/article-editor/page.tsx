@@ -66,7 +66,7 @@ const ArticleEditorPage = () => {
 
     return (
         <div className="flex flex-col gap-2">
-            <div className='flex flex-col mb-4'>
+            <div className='flex flex-col mb-2'>
                 <div className='flex justify-between items-center text-xs'>
                     <p className='text-gray-400 text-sm'>Saved</p>
                     <button onClick={() => {setShowUpload(!show_upload); setUploadOpened(true);}} className='px-5 py-1.5 bg-green-600 text-white font-medium rounded-full'>Upload</button>

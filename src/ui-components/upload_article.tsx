@@ -14,7 +14,7 @@ const UploadArticleItem = (props) => {
 
     return (
         <div className={`slide-parent ${props.show_upload ? "active" : ""}`}>
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-1">
                 <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm w-full p-4 pt-6">
                     <input type="text" className='border h-fit focus:outline-none border-gray-200 bg-transparent text-gray-500 px-5 py-2 rounded-lg' placeholder='Author' />
                     <TagItem />
@@ -23,7 +23,7 @@ const UploadArticleItem = (props) => {
                     <input value={urlSlug} onChange={(event) => setUrlSlug(event.target.value)} placeholder='Url slug' type="text" className='col-span-2 border h-fit focus:outline-none border-gray-200 bg-transparent text-gray-500 px-5 py-2 rounded-lg' />
                     <textarea value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)} placeholder='SEO description' className='col-span-2 max-h-48 border focus:outline-none border-gray-200 bg-transparent text-gray-500 px-5 py-2 rounded-lg'></textarea>
                 </div>
-                <button className="text-lg text-white rounded-xl px-5 py-2 shadow-md bg-green-600 hover:bg-green-700">
+                <button className="text-white rounded-full font-medium px-10 py-2 shadow-lg bg-green-500 mb-6">
                     Publish article
                 </button>
             </div>
@@ -36,7 +36,7 @@ const UploadArticleItem = (props) => {
                             transition: max-height 0.3s ease-in-out; /* Transition for height change */
                         }
                         .slide-parent.active {
-                            max-height: 400px;
+                            max-height: 500px;
                         }
                     `
                 }
