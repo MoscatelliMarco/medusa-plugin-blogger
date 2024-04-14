@@ -7,7 +7,7 @@ const ArticleEditorPage = () => {
     const [ uploadOpened, setUploadOpened ] = useState(false);
     const [ inputs, setInputs ] = useState({
         "title": "",
-        "description": ""
+        "subtitle": ""
     });
 
     // With MedusaJS the component is initialized two times, this is here to prevent creating multiple editors for nothing
@@ -21,25 +21,44 @@ const ArticleEditorPage = () => {
             const title = document.getElementById("title");
             title.addEventListener("keydown", (event) => {
                 if (event.key == "Enter") {
-                    // Set timeout is needed so the enter key isn't shifted to the next input
-                    setTimeout(() => {
-                        document.getElementById(title.dataset.move).focus();
-                    }, 1)
+                    event.preventDefault();
+                    document.getElementById("subtitle").focus();
                 }
             })
             const subtitle = document.getElementById("subtitle");
             subtitle.addEventListener("keydown", (event) => {
                 if (event.key == "Enter") {
-                    if (subtitle.dataset.move == "editorjs") {
-                        // Set timeout is needed so the enter key isn't shifted to the next input
-                        setTimeout(() => {
-                            editor.focus();
-                        }, 1)
-                    } else {
-                        document.getElementById(title.dataset.move).focus();
+                    event.preventDefault();
+                    editor.focus();
+                } else if (event.key == "Backspace") {
+                    if (!subtitle.value) {
+                        document.getElementById("title").focus();
                     }
                 }
             })
+            const editorContainer = document.getElementById('editorjs');
+            editorContainer.addEventListener('keydown', (event) => {
+                if (event.key === 'Backspace') {
+                    const editorBlocks = editor.blocks.getBlocksCount();
+                    if (editorBlocks === 1) {
+                        const firstBlock = editor.blocks.getBlockByIndex(0);
+                        if (firstBlock.isEmpty) {
+                            document.getElementById("subtitle").focus();
+                        }
+                    }
+                }
+            });
+
+            // Resize textarea so they are like inputs but with breakline
+            const autoResizeInputs = document.querySelectorAll(".auto-resize");
+            for (let input of autoResizeInputs) {
+                input.addEventListener('input', autoResize, false);
+    
+                function autoResize() {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                }
+            }
 
             runned = true;
         }
@@ -59,9 +78,8 @@ const ArticleEditorPage = () => {
                 IMAGE
             </div>
 
-            <input onChange={(event) => {setInputs({...inputs, title: event.target.value})}} id='title' data-move="subtitle" name='title' className='text-4xl font-semibold bg-transparent focus:outline-none' placeholder='Title' type="text" />
-            <input onChange={(event) => {setInputs({...inputs, description: event.target.value})}} id='subtitle' data-move="editorjs" name='subtitle' className='text-lg text-gray-500 bg-transparent focus:outline-none auto-height-input' placeholder='Subtitle' type="text" />
-
+            <textarea rows={1} className='auto-resize overflow-hidden resize-none h-auto font-semibold text-4xl text-gray-500 bg-transparent focus:outline-none auto-height-input' placeholder='Title' onChange={(event) => {setInputs({...inputs, title: event.target.value})}} name="title" id="title"></textarea>
+            <textarea rows={1} className='auto-resize overflow-hidden resize-none h-auto text-lg text-gray-500 bg-transparent focus:outline-none auto-height-input' placeholder='Subtitle' onChange={(event) => {setInputs({...inputs, subtitle: event.target.value})}} name="subtitle" id="subtitle"></textarea>
             <div id="editorjs"></div>
         </div>
     )
