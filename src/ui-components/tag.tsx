@@ -7,7 +7,9 @@ const TagItem = () => {
     const tagRef = useRef(null);
     useEffect(() => {
         // Tags logic
-        const tagify = new Tagify(tagRef.current, {})
+        const tagify = new Tagify(tagRef.current, {
+            maxTags: 5
+        })
         new DragSort(tagify.DOM.scope, {
             selector:'.'+tagify.settings.classNames.tag,
             callbacks: {
@@ -22,7 +24,7 @@ const TagItem = () => {
     return (
         <div>
             <TagStyle />
-            <input ref={tagRef} id="tags" name="tags" className="bg-transparent h-fit focus:outline-none border border-gray-200 font-medium w-full px-5 py-2 rounded-full" placeholder="Tags"/>
+            <input ref={tagRef} id="tags" name="tags" className="bg-transparent rounded-lg h-fit focus:outline-none font-medium w-full" placeholder="Tags"/>
         </div>
     )
 }
