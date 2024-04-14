@@ -3,6 +3,20 @@ import EditorJS from '@editorjs/editorjs';
 import UploadArticleItem from '../../../ui-components/upload_article';
 import UploadImageItem from '../../../ui-components/upload_image';
 
+// Editor JS plugins
+import Paragraph from '@editorjs/paragraph';
+import Header from '@editorjs/header';
+import Quote from '@editorjs/quote';
+import Warning from '@editorjs/warning';
+import Delimiter from '@editorjs/delimiter';
+import NestedList from '@editorjs/nested-list';
+import SimpleImage from "simple-image-editorjs";
+import Table from '@editorjs/table';
+import CodeTool from '@editorjs/code';
+import Marker from '@editorjs/marker';
+import InlineCode from '@editorjs/inline-code';
+import Underline from '@editorjs/underline';
+
 const ArticleEditorPage = () => {
     const [ show_upload, setShowUpload ] = useState(false);
     const [ uploadOpened, setUploadOpened ] = useState(false);
@@ -17,7 +31,37 @@ const ArticleEditorPage = () => {
         if (!runned) {
             const editor = new EditorJS({
                 holder : 'editorjs',
-                placeholder: "Body"
+                placeholder: "Body",
+                tools: {
+                    paragraph: {
+                        class: Paragraph,
+                        inlineToolbar: true,
+                    },
+                    header: Header,
+                    quote: Quote,
+                    warning: Warning,
+                    delimiter: Delimiter,
+                    list: {
+                        class: NestedList,
+                        inlineToolbar: true,
+                        config: {
+                          defaultStyle: 'unordered'
+                        },
+                    },
+                    image: SimpleImage,
+                    table: {
+                        class: Table,
+                        inlineToolbar: true,
+                    },
+                    code: CodeTool,
+                    Marker: {
+                        class: Marker
+                    },
+                    inlineCode: {
+                        class: InlineCode
+                    },
+                    underline: Underline
+                },
             });
             const title = document.getElementById("title");
             title.addEventListener("keydown", (event) => {
@@ -89,6 +133,24 @@ const ArticleEditorPage = () => {
                     .ce-block__content, 
                     .ce-toolbar__content {
                      max-width: none; 
+                    }
+                    h1 {
+                        font-size: 2rem;
+                    }
+                    h2 {
+                        font-size: 1.5rem;
+                    }
+                    h3 {
+                        font-size: 1.17rem;
+                    }
+                    h4 {
+                        font-size: 1rem;
+                    }
+                    h5 {
+                        font-size: 0.83rem;
+                    }
+                    h6 {
+                        font-size: 0.67rem;
                     }
                     `
                 }

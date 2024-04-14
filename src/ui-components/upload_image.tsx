@@ -45,7 +45,7 @@ const UploadImageItem = () => {
                 </div>
             )}
             {selectedFile && (
-                <div className='absolute top-4 left-4 flex justify-center'>
+                <div className='absolute top-2.5 left-2.5 flex justify-center'>
                     <button onClick={() => setSelectedFile(null)} className='p-1.5 bg-red-600 bg-opacity-50 text-white font-medium rounded-xl'>
                         <XMark />
                     </button>
