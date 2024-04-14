@@ -23,7 +23,7 @@ const UploadArticleItem = (props) => {
                     <input value={urlSlug} onChange={(event) => setUrlSlug(event.target.value)} placeholder='Url slug' type="text" className='col-span-2 border h-fit focus:outline-none border-gray-200 bg-transparent text-gray-500 px-5 py-2 rounded-lg' />
                     <textarea value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)} placeholder='SEO description' className='col-span-2 max-h-48 border focus:outline-none border-gray-200 bg-transparent text-gray-500 px-5 py-2 rounded-lg'></textarea>
                 </div>
-                <button className="text-white rounded-full font-medium px-10 py-2 shadow-lg bg-green-500 mb-6">
+                <button className="text-white rounded-full font-medium px-10 py-2 shadow-md bg-green-500 mb-2">
                     Publish article
                 </button>
             </div>
