@@ -10,13 +10,13 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
-    const blogArticleRepository: typeof BlogArticleRepository = req.scope.resolve("blogArticleRepository");
-    const manager: EntityManager = req.scope.resolve("manager");
-    const blogArticleRepo = manager.withRepository(blogArticleRepository);
+    // const blogArticleRepository: typeof BlogArticleRepository = req.scope.resolve("blogArticleRepository");
+    // const manager: EntityManager = req.scope.resolve("manager");
+    // const blogArticleRepo = manager.withRepository(blogArticleRepository);
 
-    return res.json({
-        posts: await blogArticleRepo.find(),
-    })
+    // return res.json({
+    //     posts: await blogArticleRepo.find(),
+    // })
 }
 
 export const PUT = async (req: MedusaRequest, res: MedusaResponse) => {
