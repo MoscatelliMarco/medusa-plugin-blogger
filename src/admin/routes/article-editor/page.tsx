@@ -114,7 +114,7 @@ const ArticleEditorPage = () => {
             <div className='flex flex-col'>
                 <div className='flex justify-between items-center text-xs'>
                     <p className='text-gray-400 text-sm'>Saved</p>
-                    <button onClick={() => {setShowUpload(!show_upload); setUploadOpened(true);}} className='px-5 py-1.5 bg-green-600 text-white font-medium rounded-full'>Upload</button>
+                    <button onClick={() => {setShowUpload(!show_upload); setUploadOpened(true);}} className='px-5 py-1.5 bg-green-600 text-white font-medium rounded-full shadow'>Upload</button>
                 </div>
                 <UploadArticleItem show_upload={show_upload} upload_opened={uploadOpened} inputs={inputs} />
             </div>
@@ -123,9 +123,9 @@ const ArticleEditorPage = () => {
                 <UploadImageItem />
             </div>
 
-            <textarea rows={1} className='auto-resize overflow-hidden resize-none h-auto font-semibold text-4xl text-gray-500 bg-transparent focus:outline-none auto-height-input' placeholder='Title' onChange={(event) => {setInputs({...inputs, title: event.target.value})}} name="title" id="title"></textarea>
+            <textarea rows={1} className='auto-resize overflow-hidden resize-none h-auto font-semibold text-4xl text-gray-700 bg-transparent focus:outline-none auto-height-input' placeholder='Title' onChange={(event) => {setInputs({...inputs, title: event.target.value})}} name="title" id="title"></textarea>
             <textarea rows={1} className='auto-resize overflow-hidden resize-none h-auto text-lg text-gray-500 bg-transparent focus:outline-none auto-height-input' placeholder='Subtitle' onChange={(event) => {setInputs({...inputs, subtitle: event.target.value})}} name="subtitle" id="subtitle"></textarea>
-            <div id="editorjs"></div>
+            <div id="editorjs" className='text-gray-800'></div>
 
             <style>
                 {

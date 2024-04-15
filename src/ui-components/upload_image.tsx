@@ -34,9 +34,9 @@ const UploadImageItem = () => {
             <div {...getRootProps()} className='w-full flex justify-center items-center h-full'>
                 <input {...getInputProps()} />
                 {isDragActive ? (
-                    <p>Drop the files here ...</p>
+                    <p>Drop the thumbnail image here...</p>
                 ) : (
-                    <p>Drag and drop some files here, or click to select files</p>
+                    <p>Drag and drop the thumbnail image here, or click to select the file</p>
                 )}
             </div>
             {selectedFile && (
