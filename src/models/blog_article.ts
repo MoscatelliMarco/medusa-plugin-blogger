@@ -7,7 +7,7 @@ import { BaseEntity } from "@medusajs/medusa"
 import { generateEntityId } from "@medusajs/medusa/dist/utils"
   
 @Entity()
-export class Article extends BaseEntity {
+export class BlogArticle extends BaseEntity {
     @Column({ nullable: true })
     author: string;
 
@@ -34,6 +34,9 @@ export class Article extends BaseEntity {
 
     @Column('jsonb', { nullable: false })
     body: any; // Assuming body will be a complex JSON structure
+
+    @Column({ nullable: false })
+    draft: boolean;
 
     @BeforeInsert()
     private beforeInsert(): void {
