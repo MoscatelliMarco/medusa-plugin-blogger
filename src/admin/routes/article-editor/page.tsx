@@ -71,7 +71,7 @@ const ArticleEditorPage = () => {
                     document.getElementById("subtitle").focus();
                 }
             })
-            const subtitle = document.getElementById("subtitle");
+            const subtitle = document.getElementById("subtitle") as any;
             subtitle.addEventListener("keydown", (event) => {
                 if (event.key == "Enter") {
                     event.preventDefault();
