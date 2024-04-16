@@ -2,36 +2,44 @@ import { RouteConfig } from "@medusajs/admin"
 import { DocumentSeries, ArchiveBox, MagnifyingGlass, Funnel, TrianglesMini } from "@medusajs/icons"
 import ArticleItem from "../../../ui-components/article_item";
 import { Link } from "react-router-dom";
+import { Button, Input, Container } from "@medusajs/ui";
 
 const ArticlePage = () => {
   return (
     <div className="flex flex-col gap-7">
 
         <div className="flex justify-between items-center">
-            <Link to="/a/article-editor" className="px-4 py-1.5 rounded-md bg-green-400 text-white font-medium flex gap-3 items-center">
-                <ArchiveBox/>
-                New article
+            <Link to="/a/article-editor">
+                <Button variant="primary">
+                  <ArchiveBox/>
+                  New article
+                </Button>
             </Link>
             <div className="flex items-center gap-2">
-                <div className="px-4 py-1.5 flex gap-2 items-center text-white bg-blue-400 rounded-md font-medium">
+                <Button variant="secondary">
                     <TrianglesMini />
                     Sort by
-                </div>
-                <div className="px-4 py-1.5 flex gap-2 items-center text-white bg-yellow-400 rounded-md font-medium">
+                </Button>
+                <Button variant="secondary">
                     <Funnel />
                     Filter
-                </div>
+                </Button>
                 <div className="relative">
                     <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
-                    <input type="text" className="focus:outline-none border border-gray-300 rounded-md py-1.5 pr-4 pl-10 placeholder-gray-400" placeholder="Search" />
+                    {/* <input type="text" className="focus:outline-none border border-gray-300 rounded-md py-1.5 pr-4 pl-10 placeholder-gray-400" placeholder="Search" /> */}
+                    <Input className="bg-white" type="search" />
                 </div>
             </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-x-3 gap-y-4">
-            <ArticleItem />
-            <ArticleItem />
-        </div>
+          <div className="grid grid-cols-3 gap-x-3 gap-y-4">
+              <Container className="p-1.5">
+                <ArticleItem/>
+              </Container>
+              <Container className="p-1.5">
+                <ArticleItem/>
+              </Container>
+          </div>
 
     </div>
   )

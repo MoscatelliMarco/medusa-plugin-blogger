@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import EditorJS from '@editorjs/editorjs';
 import UploadArticleItem from '../../../ui-components/upload_article';
 import UploadImageItem from '../../../ui-components/upload_image';
+import { Button, Container } from "@medusajs/ui";
 
 // Editor JS plugins
 import Paragraph from '@editorjs/paragraph';
@@ -110,29 +111,37 @@ const ArticleEditorPage = () => {
     }, [])
 
     return (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-5">
             <div className='flex flex-col'>
                 <div className='flex justify-between items-center text-xs'>
                     <p className='text-gray-400 text-sm'>Saved</p>
-                    <button onClick={() => {setShowUpload(!show_upload); setUploadOpened(true);}} className='px-5 py-1.5 bg-green-600 text-white font-medium rounded-full shadow'>Upload</button>
+                    {/* <button onClick={() => {setShowUpload(!show_upload); setUploadOpened(true);}} className='px-5 py-1.5 bg-green-600 text-white font-medium rounded-full shadow'>Upload</button> */}
+                    <Button className='px-5 py-1.5' variant='secondary' onClick={() => {setShowUpload(!show_upload); setUploadOpened(true);}} size="small">
+                        Upload
+                    </Button>
                 </div>
                 <UploadArticleItem show_upload={show_upload} upload_opened={uploadOpened} inputs={inputs} />
             </div>
 
-            <div className='my-4'>
+            <Container className='flex flex-col itesm-center gap-6 p-5'>
                 <UploadImageItem />
-            </div>
 
-            <textarea rows={1} className='auto-resize overflow-hidden resize-none h-auto font-semibold text-4xl text-gray-700 bg-transparent focus:outline-none auto-height-input' placeholder='Title' onChange={(event) => {setInputs({...inputs, title: event.target.value})}} name="title" id="title"></textarea>
-            <textarea rows={1} className='auto-resize overflow-hidden resize-none h-auto text-lg text-gray-500 bg-transparent focus:outline-none auto-height-input' placeholder='Subtitle' onChange={(event) => {setInputs({...inputs, subtitle: event.target.value})}} name="subtitle" id="subtitle"></textarea>
-            <div id="editorjs" className='text-gray-800'></div>
+                <div className='flex flex-col gap-0.5 mx-[3.25rem] max-w-5xl'>
+                    <textarea rows={1} className='auto-resize overflow-hidden resize-none h-auto font-semibold text-4xl text-gray-700 bg-transparent focus:outline-none auto-height-input' placeholder='Title' onChange={(event) => {setInputs({...inputs, title: event.target.value})}} name="title" id="title"></textarea>
+                    <textarea rows={1} className='auto-resize overflow-hidden resize-none font-medium h-auto text-xl text-gray-500 bg-transparent focus:outline-none auto-height-input' placeholder='Subtitle' onChange={(event) => {setInputs({...inputs, subtitle: event.target.value})}} name="subtitle" id="subtitle"></textarea>
+                    <div id="editorjs" className='text-gray-700 break-words mt-1'></div>
+                </div>
+            </Container>
 
             <style>
                 {
                     `
                     .ce-block__content, 
                     .ce-toolbar__content {
-                     max-width: none; 
+                     max-width: 100%; 
+                    }
+                    .ce-toolbar__plus svg path {
+                        stroke: rgb(55 65 81);
                     }
                     h1 {
                         font-size: 2rem;

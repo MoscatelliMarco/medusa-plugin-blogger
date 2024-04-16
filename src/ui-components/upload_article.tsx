@@ -1,5 +1,6 @@
 import TagItem from "./tag";
 import { useState, useEffect } from "react";
+import { Button, Textarea, Input, Container } from "@medusajs/ui";
 
 const UploadArticleItem = (props) => {
     const [ seoTitle, setSeoTitle ] = useState(props.upload_opened ? (props.inputs.title) : "");
@@ -14,40 +15,42 @@ const UploadArticleItem = (props) => {
 
     return (
         <div className={`slide-parent ${props.show_upload ? "active" : ""}`}>
-            <div className="flex flex-col items-center gap-1">
-                <div className="flex justify-center pt-2">
-                    <p className="text-center font-light text-xs text-gray-400/80 max-w-sm">*Note that these inputs are not mandatory, as their application depends on your frontend</p>
+            <Container className="py-5 mt-4">
+                <div className="flex flex-col items-center gap-1">
+                    <div className="flex justify-center">
+                        <p className="text-center font-light text-xs text-gray-400/80 max-w-sm">*Note that these inputs are not mandatory, as their application depends on your frontend</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-5 gap-y-4 text-sm w-full p-4">
+                        <div className="flex flex-col gap-0.5">
+                            <label htmlFor="author" className="text-xs text-gray-400 ml-2 font-medium">Author</label>
+                            <Input id="author" name="author" type="text" placeholder='Author' />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                            <label htmlFor="tags" className="text-xs text-gray-400 ml-2 font-medium">Tags</label>
+                            <TagItem />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                            <label htmlFor="seo-title" className="text-xs text-gray-400 ml-2 font-medium">SEO title</label>
+                            <Input id="seo-title" name="seo-title" value={seoTitle} onChange={(event) => setSeoTitle(event.target.value)} placeholder='SEO title' type="text" />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                            <label htmlFor="seo-keywords" className="text-xs text-gray-400 ml-2 font-medium">SEO keywords</label>
+                            <Input id="seo-keywords" name="seo-keywords" placeholder='SEO keywords' type="text" />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                            <label htmlFor="url-slug" className="text-xs text-gray-400 ml-2 font-medium">Url slug</label>
+                            <Input value={urlSlug} onChange={(event) => setUrlSlug(event.target.value)} placeholder='Url slug' type="text" />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                            <label htmlFor="seo-description" className="text-xs text-gray-400 ml-2 font-medium">SEO description</label>
+                            <Textarea id="seo-description" name="seo-description" value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)} placeholder='SEO description' ></Textarea>
+                        </div>
+                    </div>
+                    <Button size="large" className="px-6 py-1.5 mb-0.5">
+                        Publish
+                    </Button>
                 </div>
-                <div className="grid grid-cols-2 gap-x-5 gap-y-4 text-sm w-full p-4">
-                    <div className="flex flex-col gap-0.5">
-                        <label htmlFor="author" className="text-xs text-gray-400 ml-2 font-medium">Author</label>
-                        <input id="author" name="author" type="text" className='border h-fit focus:outline-none border-gray-200 bg-transparent text-gray-500 px-3.5 py-2 rounded-lg' placeholder='Author' />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                        <label htmlFor="tags" className="text-xs text-gray-400 ml-2 font-medium">Tags</label>
-                        <TagItem />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                        <label htmlFor="seo-title" className="text-xs text-gray-400 ml-2 font-medium">SEO title</label>
-                        <input id="seo-title" name="seo-title" value={seoTitle} onChange={(event) => setSeoTitle(event.target.value)} placeholder='SEO title' type="text" className='border h-fit focus:outline-none border-gray-200 bg-transparent text-gray-500 px-3.5 py-2 rounded-lg' />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                        <label htmlFor="seo-keywords" className="text-xs text-gray-400 ml-2 font-medium">SEO keywords</label>
-                        <input id="seo-keywords" name="seo-keywords" placeholder='SEO keywords' type="text" className='border h-fit focus:outline-none border-gray-200 bg-transparent text-gray-500 px-3.5 py-2 rounded-lg' />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                        <label htmlFor="url-slug" className="text-xs text-gray-400 ml-2 font-medium">Url slug</label>
-                        <input value={urlSlug} onChange={(event) => setUrlSlug(event.target.value)} placeholder='Url slug' type="text" className='col-span-2 border h-fit focus:outline-none border-gray-200 bg-transparent text-gray-500 px-3.5 py-2 rounded-lg' />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                        <label htmlFor="seo-description" className="text-xs text-gray-400 ml-2 font-medium">SEO description</label>
-                        <textarea id="seo-description" name="seo-description" value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)} placeholder='SEO description' className='col-span-2 max-h-48 border focus:outline-none border-gray-200 bg-transparent text-gray-500 px-3.5 py-2 rounded-lg'></textarea>
-                    </div>
-                </div>
-                <button className="text-white border border-white rounded-full font-medium px-10 py-2 shadow-md bg-green-500 mb-2">
-                    Publish article
-                </button>
-            </div>
+            </Container>
             <style>
                 {
                     `
