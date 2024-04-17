@@ -48,6 +48,7 @@
     "cors": "^2.8.5",
     "dotenv": "16.3.1",
     "express": "^4.17.2",
+    "medusa-react": "^9.0.16",
     "react-dropzone": "^14.2.3",
     "simple-image-editorjs": "^1.4.0",
     "typeorm": "^0.3.16"

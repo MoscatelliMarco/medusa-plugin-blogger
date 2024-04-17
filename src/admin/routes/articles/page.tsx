@@ -10,28 +10,21 @@ import ArticleItem from "../../../ui-components/article_item";
 import { Link } from "react-router-dom";
 import { Button, Input, Container } from "@medusajs/ui";
 import { useEffect, useState } from "react";
+import { useAdminCustomQuery } from "medusa-react";
 
 const ArticlePage = () => {
     const [error, setError] = useState("");
 
+    const { data, isLoading } = useAdminCustomQuery(
+        "/custom",
+        [""], 
+        {
+        }
+    )
+
     useEffect(() => {
-        const request = fetch("/admin/customers", {
-            method: "POST",
-            headers: {
-                'Accept': 'application/json'
-            }
-        }).then((response) => {
-            if (!response.ok) {
-                setError("Failed to fetch blog articles");
-            }
-            console.log(response)
-            return response.text()
-        }).then((data) => {
-            console.log(data)
-        }).catch(error => {
-            setError(error.message);
-        })
-    }, []);
+        console.log(data)
+    }, [data])
 
     return (
         <div className="flex flex-col gap-7 items-center">
@@ -59,7 +52,7 @@ const ArticlePage = () => {
                 </div>
             </div>
 
-            {!error ? 
+            {/* {!error ? 
             <div className="grid grid-cols-3 gap-x-3 gap-y-4">
                 <Container className="p-1.5">
                     <ArticleItem />
@@ -69,7 +62,9 @@ const ArticlePage = () => {
                 </Container>
             </div>:
             <p className="text-center max-w-sm text-red-500 mt-4 font-medium">{error}</p>
-            }
+            } */}
+            {/* <p className="text-center max-w-sm text-blue-500 mt-4 font-medium">{data}</p> */}
+            <p className="text-center max-w-sm text-green-500 mt-4 font-medium">{isLoading ? "Loading" : "Not loading"}</p>
         </div>
     );
 };
