@@ -6,15 +6,16 @@ import { EntityManager } from "typeorm";
 import { BlogArticle } from "../../../../models/blog_article";
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
-    const manager: EntityManager = req.scope.resolve("manager");
-    const blogArticleRepo = manager.getRepository(BlogArticle);
+    try {
+        const manager: EntityManager = req.scope.resolve("manager");
+        const blogArticleRepo = manager.getRepository(BlogArticle);
 
-    const article = await blogArticleRepo.find();
-    console.log('__________________________________')
-    console.log(article)
-    console.log('__________________________________')
+        const article = await blogArticleRepo.find();
 
-    return res.json(article)
+        return res.json(article)
+    } catch (e) {
+        return res.json({error: e})
+    }
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {

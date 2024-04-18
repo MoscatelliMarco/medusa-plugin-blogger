@@ -4,7 +4,7 @@ export class CreateBlogPostTable1713183081316 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(new Table({
-            name: "blog_articles",
+            name: "blog_article",
             columns: [
                 { name: "id", type: "varchar", isPrimary: true},
                 { name: "author", type: "varchar", isNullable: true },
@@ -22,6 +22,6 @@ export class CreateBlogPostTable1713183081316 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable("blog_articles");
+        await queryRunner.dropTable("blog_article");
     }
 }

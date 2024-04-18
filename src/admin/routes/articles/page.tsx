@@ -16,18 +16,22 @@ const ArticlePage = () => {
     const [error, setError] = useState("");
 
     const { data, isLoading } = useAdminCustomQuery(
-        "/custom",
+        "/blog/articles",
         [""], 
         {
         }
     )
 
     useEffect(() => {
-        console.log(data)
+        if (data?.error) {
+            setError(data.error)
+        } else {
+            // Initialize articles in case of success
+        }
     }, [data])
 
     return (
-        <div className="flex flex-col gap-7 items-center">
+        <div className="flex flex-col gap-7 items-center break-words">
             <div className="flex justify-between items-center w-full">
                 <Link to="/a/article-editor">
                     <Button variant="primary">
@@ -51,20 +55,26 @@ const ArticlePage = () => {
                     </div>
                 </div>
             </div>
-
-            {/* {!error ? 
-            <div className="grid grid-cols-3 gap-x-3 gap-y-4">
-                <Container className="p-1.5">
-                    <ArticleItem />
-                </Container>
-                <Container className="p-1.5">
-                    <ArticleItem />
-                </Container>
-            </div>:
-            <p className="text-center max-w-sm text-red-500 mt-4 font-medium">{error}</p>
-            } */}
-            {/* <p className="text-center max-w-sm text-blue-500 mt-4 font-medium">{data}</p> */}
-            <p className="text-center max-w-sm text-green-500 mt-4 font-medium">{isLoading ? "Loading" : "Not loading"}</p>
+            {
+                isLoading ?
+                    (<p className="text-center max-w-sm text-green-500 mt-4 font-medium">Loading...</p>)
+                :
+                (
+                    !error ? 
+                    (<div className="grid grid-cols-3 gap-x-3 gap-y-4">
+                        <Container className="p-1.5">
+                            <ArticleItem />
+                        </Container>
+                        <Container className="p-1.5">
+                            <ArticleItem />
+                        </Container>
+                    </div>)
+                    :
+                    (<p className={`${typeof error === 'object' ? "text-start" : "text-center"} max-w-sm text-red-500 mt-4 font-medium`}>{
+                        typeof error === 'object' ? JSON.stringify(error) : error
+                        }</p>)
+                )
+            }
         </div>
     );
 };
