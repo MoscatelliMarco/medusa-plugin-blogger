@@ -17,9 +17,7 @@ const ArticlePage = () => {
 
     const { data, isLoading } = useAdminCustomQuery(
         "/blog/articles",
-        [""], 
-        {
-        }
+        [""]
     )
 
     useEffect(() => {

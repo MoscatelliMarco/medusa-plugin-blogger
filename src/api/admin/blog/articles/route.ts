@@ -3,12 +3,12 @@ import type {
     MedusaResponse
 } from "@medusajs/medusa"
 import { EntityManager } from "typeorm";
-import { BlogArticle } from "../../../../models/blog_article";
+import BlogArticleRepository from "src/services/blog_article";
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
         const manager: EntityManager = req.scope.resolve("manager");
-        const blogArticleRepo = manager.getRepository(BlogArticle);
+        const blogArticleRepo = new BlogArticleRepository(manager);
 
         const article = await blogArticleRepo.find();
 
@@ -19,7 +19,14 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
-    return res.json({
-        success: true
-    })
+    try {
+        const manager: EntityManager = req.scope.resolve("manager");
+        const blogArticleRepo = new BlogArticleRepository(manager);
+
+        const article = await blogArticleRepo.add(req.body);
+
+        return res.json(article)
+    } catch (e) {
+        return res.json({error: e})
+    }
 }

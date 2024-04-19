@@ -3,6 +3,7 @@ import EditorJS from "@editorjs/editorjs";
 import UploadArticleItem from "../../../ui-components/upload_article";
 import UploadImageItem from "../../../ui-components/upload_image";
 import { Button, Container } from "@medusajs/ui";
+import { useAdminCustomPost } from "medusa-react";
 
 // Editor JS plugins
 import Paragraph from "@editorjs/paragraph";
@@ -115,15 +116,36 @@ const ArticleEditorPage = () => {
         }
     }, []);
 
-    const submitHandleClick = async () => {
-        const article = await getArticle();
+    const { mutate } = useAdminCustomPost(
+        "/blog/articles",
+        [""]
+    )
+
+    const onSubmit = async (article) => {
+        return mutate(
+            {
+                ...article
+            },
+            {
+                onSuccess: async (event) => {
+                    console.log(event)
+                },
+                onError: async (event) => {
+                    console.log(event)
+                }
+            }
+        )
+    }
+
+    const handleClick = async () => {
+        const article = await getContent();
         if (!article) {
             return
         }
-        console.log(article)
+        onSubmit(article)
     }
 
-    const getArticle = async () => {
+    const getContent = async () => {
         let article = {
             author: document.getElementById("author")?.value,
             tags: document.getElementById("tags")?.value,
@@ -161,7 +183,7 @@ const ArticleEditorPage = () => {
                     show_upload={show_upload}
                     upload_opened={uploadOpened}
                     inputs={inputs}
-                    handleSubmit={submitHandleClick}
+                    handleSubmit={handleClick}
                     submitError={submitError}
                 />
             </div>

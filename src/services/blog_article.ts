@@ -24,6 +24,12 @@ class BlogArticleRepository extends TransactionBaseService {
         return await this.articleRepo.findOne(query);
     }
 
+    async add(data: Partial<BlogArticle>): Promise<BlogArticle> {
+        const newArticle = this.articleRepo.create(data);
+        const savedArticle = await this.articleRepo.save(newArticle);
+        return savedArticle;
+    }
+
     async edit(searchParams: any, updateData: Partial<BlogArticle>): Promise<BlogArticle[]> {
         const articlesToUpdate = await this.articleRepo.find({
             where: searchParams.where || {}
