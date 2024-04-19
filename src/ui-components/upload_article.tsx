@@ -39,7 +39,7 @@ const UploadArticleItem = (props) => {
                         </div>
                         <div className="flex flex-col gap-0.5">
                             <label htmlFor="url-slug" className="text-xs text-gray-400 ml-2 font-medium">Url slug</label>
-                            <Input value={urlSlug} onChange={(event) => setUrlSlug(event.target.value)} placeholder='Url slug' type="text" />
+                            <Input id="url-slug" value={urlSlug} onChange={(event) => setUrlSlug(event.target.value)} placeholder='Url slug' type="text" />
                         </div>
                         <div className="flex flex-col gap-0.5">
                             <label htmlFor="seo-description" className="text-xs text-gray-400 ml-2 font-medium">SEO description</label>
@@ -49,6 +49,9 @@ const UploadArticleItem = (props) => {
                     <Button onClick={props.handleSubmit} size="large" className="px-6 py-1.5 mb-0.5">
                         Publish
                     </Button>
+                    <div className="max-w-md text-red-500 text-center">
+                        <p>{props.submitError}</p>
+                    </div>
                 </div>
             </Container>
             <style>

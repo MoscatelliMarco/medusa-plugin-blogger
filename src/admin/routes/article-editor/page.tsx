@@ -18,9 +18,13 @@ import Marker from "@editorjs/marker";
 import InlineCode from "@editorjs/inline-code";
 import Underline from "@editorjs/underline";
 
+type EditorState = EditorJS | null;
+
 const ArticleEditorPage = () => {
     const [show_upload, setShowUpload] = useState(false);
     const [uploadOpened, setUploadOpened] = useState(false);
+    const [submitError, setSubmitError] = useState("");
+    const [editor, setEditor] = useState<EditorState>(null);
     const [inputs, setInputs] = useState({
         title: "",
         subtitle: "",
@@ -28,10 +32,9 @@ const ArticleEditorPage = () => {
 
     // With MedusaJS the component is initialized two times, this is here to prevent creating multiple editors for nothing
     let runned = false;
-    let editor;
     useEffect(() => {
         if (!runned) {
-            editor = new EditorJS({
+            let editor_el = new EditorJS({
                 holder: "editorjs",
                 placeholder: "Body",
                 tools: {
@@ -65,6 +68,7 @@ const ArticleEditorPage = () => {
                     underline: Underline,
                 },
             });
+            setEditor(editor_el);
             const title = document.getElementById("title");
             title.addEventListener("keydown", (event) => {
                 if (event.key == "Enter") {
@@ -111,24 +115,29 @@ const ArticleEditorPage = () => {
         }
     }, []);
 
-    const submitHandleClick = () => {
-        const article = getArticle();
+    const submitHandleClick = async () => {
+        const article = await getArticle();
+        if (!article) {
+            return
+        }
         console.log(article)
     }
 
-    const getArticle = () => {
-        return {
+    const getArticle = async () => {
+        let article = {
             author: document.getElementById("author")?.value,
             tags: document.getElementById("tags")?.value,
-            seo_title: document.getElementById("seo_title")?.value,
-            seo_keywords: document.getElementById("seo_keywords")?.value,
-            url_slug: document.getElementById("url_slug")?.value,
-            seo_description: document.getElementById("seo_description")?.value,
+            seo_title: document.getElementById("seo-title")?.value,
+            seo_keywords: document.getElementById("seo-keywords")?.value,
+            url_slug: document.getElementById("url-slug")?.value,
+            seo_description: document.getElementById("seo-description")?.value,
 
+            image: document.getElementById("thumbnail")?.src,
             title: document.getElementById("title")?.value,
             subtitle: document.getElementById("subtitle")?.value,
-            body: editor?.save(),
+            body: await editor?.save()
         }
+        return article;
     }
 
     return (
@@ -153,6 +162,7 @@ const ArticleEditorPage = () => {
                     upload_opened={uploadOpened}
                     inputs={inputs}
                     handleSubmit={submitHandleClick}
+                    submitError={submitError}
                 />
             </div>
 

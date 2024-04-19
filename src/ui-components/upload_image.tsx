@@ -41,7 +41,7 @@ const UploadImageItem = () => {
             </div>
             {selectedFile && (
                 <div className='overflow-hidden absolute top-0 left-0 w-full h-full bg-transparency-pattern'>
-                    <img src={selectedFile} alt="Uploaded" className='w-full h-full object-cover' />
+                    <img src={selectedFile} id='thumbnail' alt="Uploaded" className='w-full h-full object-cover' />
                 </div>
             )}
             {selectedFile && (
