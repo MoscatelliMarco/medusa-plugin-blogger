@@ -9,15 +9,8 @@ class BlogArticleRepository extends TransactionBaseService {
         this.articleRepo = this.activeManager_.getRepository(BlogArticle);
     }
 
-    async find(searchParams?: any): Promise<BlogArticle[]> {
-        let query = {};
-        if (searchParams) {
-            query = {
-                where: searchParams.where || {},
-                order: searchParams.order || {}
-            };
-        }
-        return await this.articleRepo.find(query);
+    async find(): Promise<BlogArticle[]> {
+        return await this.articleRepo.find();
     }
 
     async findOne(searchParams?: any): Promise<BlogArticle | undefined> {

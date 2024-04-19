@@ -46,7 +46,7 @@ const UploadArticleItem = (props) => {
                             <Textarea id="seo-description" name="seo-description" value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)} placeholder='SEO description' ></Textarea>
                         </div>
                     </div>
-                    <Button size="large" className="px-6 py-1.5 mb-0.5">
+                    <Button onClick={props.handleSubmit} size="large" className="px-6 py-1.5 mb-0.5">
                         Publish
                     </Button>
                 </div>
