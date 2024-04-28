@@ -128,10 +128,14 @@ const ArticleEditorPage = () => {
             },
             {
                 onSuccess: async (event) => {
+                    console.log("SUCCESS")
                     console.log(event)
+
                 },
                 onError: async (event) => {
+                    console.log("ERROR")
                     console.log(event)
+
                 }
             }
         )
@@ -139,6 +143,7 @@ const ArticleEditorPage = () => {
 
     const handleClick = async () => {
         const article = await getContent();
+        console.log(article)
         if (!article) {
             return
         }
@@ -154,7 +159,7 @@ const ArticleEditorPage = () => {
             url_slug: document.getElementById("url-slug")?.value,
             seo_description: document.getElementById("seo-description")?.value,
 
-            image: document.getElementById("thumbnail")?.src,
+            thumbnail_image: document.getElementById("thumbnail")?.src,
             title: document.getElementById("title")?.value,
             subtitle: document.getElementById("subtitle")?.value,
             body: await editor?.save()

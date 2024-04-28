@@ -13,6 +13,7 @@ export class CreateBlogPostTable1713183081316 implements MigrationInterface {
                 { name: "seo_keywords", type: "varchar", isNullable: true },
                 { name: "url_slug", type: "varchar", isNullable: true },
                 { name: "seo_description", type: "varchar", isNullable: true },
+                { name: "thumbnail_image", type: "varchar", isNullable: true },
                 { name: "title", type: "varchar" },
                 { name: "subtitle", type: "varchar" },
                 { name: "body", type: "jsonb" },

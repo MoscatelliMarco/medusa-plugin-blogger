@@ -21,6 +21,7 @@ const ArticlePage = () => {
     )
 
     useEffect(() => {
+        console.log(data)
         if (data?.error) {
             setError(data.error)
         } else {
@@ -59,14 +60,17 @@ const ArticlePage = () => {
                 :
                 (
                     !error ? 
-                    (<div className="grid grid-cols-3 gap-x-3 gap-y-4">
-                        <Container className="p-1.5">
-                            <ArticleItem />
-                        </Container>
-                        <Container className="p-1.5">
-                            <ArticleItem />
-                        </Container>
-                    </div>)
+                    (
+                        JSON.stringify(data)
+                    // <div className="grid grid-cols-3 gap-x-3 gap-y-4">
+                    //     <Container className="p-1.5">
+                    //         <ArticleItem />
+                    //     </Container>
+                    //     <Container className="p-1.5">
+                    //         <ArticleItem />
+                    //     </Container>
+                    // </div>
+                    )
                     :
                     (<p className={`${typeof error === 'object' ? "text-start" : "text-center"} max-w-sm text-red-500 mt-4 font-medium`}>{
                         typeof error === 'object' ? JSON.stringify(error) : error

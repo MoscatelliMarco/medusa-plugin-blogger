@@ -31,12 +31,15 @@ export class BlogArticle extends BaseEntity {
     seoDescription: string;
 
     @Column({ nullable: false })
+    thumbnail_image: string;
+
+    @Column({ nullable: false })
     title: string;
 
     @Column({ nullable: false })
     subtitle: string;
 
-    @Column('jsonb', { nullable: false })
+    @Column('json', { nullable: false, array: false })
     body: any; // Assuming body will be a complex JSON structure
 
     @Column({ nullable: false })
