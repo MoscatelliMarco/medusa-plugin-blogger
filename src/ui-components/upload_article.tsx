@@ -11,6 +11,10 @@ const UploadArticleItem = (props) => {
         setSeoTitle(props.upload_opened ? (props.inputs.title) : "");
         setSeoDescription(props.upload_opened ? (props.inputs.subtitle) : "");
         setUrlSlug(props.upload_opened ? (slugify(props.inputs.title)) : "");
+
+        document.querySelector("#tags").addEventListener("change", () => {
+            let tag = document.querySelector("#tags") as any
+        })
     }, [props.upload_opened])
 
     return (

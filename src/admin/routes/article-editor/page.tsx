@@ -153,16 +153,18 @@ const ArticleEditorPage = () => {
     const getContent = async () => {
         let article = {
             author: document.getElementById("author")?.value,
-            tags: document.getElementById("tags")?.value,
+            tags: document.getElementById("tags")?.value ? JSON.parse(document.getElementById("tags")?.value).map(obj => obj.value) : [],
             seo_title: document.getElementById("seo-title")?.value,
             seo_keywords: document.getElementById("seo-keywords")?.value,
             url_slug: document.getElementById("url-slug")?.value,
             seo_description: document.getElementById("seo-description")?.value,
 
-            thumbnail_image: document.getElementById("thumbnail")?.src,
+            thumbnail_image: document.getElementById("thumbnail") ? document.getElementById("thumbnail").src : "",
             title: document.getElementById("title")?.value,
             subtitle: document.getElementById("subtitle")?.value,
-            body: await editor?.save()
+            body: await editor?.save(),
+
+            draft: false
         }
         return article;
     }
