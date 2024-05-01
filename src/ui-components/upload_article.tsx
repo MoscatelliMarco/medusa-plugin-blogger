@@ -1,6 +1,6 @@
 import TagItem from "./tag";
 import { useState, useEffect } from "react";
-import { Button, Textarea, Input, Container } from "@medusajs/ui";
+import { Button, Textarea, Input, Container, Checkbox } from "@medusajs/ui";
 
 const UploadArticleItem = (props) => {
     const [ seoTitle, setSeoTitle ] = useState(props.upload_opened ? (props.inputs.title) : "");
@@ -11,10 +11,7 @@ const UploadArticleItem = (props) => {
         setSeoTitle(props.upload_opened ? (props.inputs.title) : "");
         setSeoDescription(props.upload_opened ? (props.inputs.subtitle) : "");
         setUrlSlug(props.upload_opened ? (slugify(props.inputs.title)) : "");
-
-        document.querySelector("#tags").addEventListener("change", () => {
-            let tag = document.querySelector("#tags") as any
-        })
+        document.getElementById("draft").click();
     }, [props.upload_opened])
 
     return (
@@ -50,11 +47,20 @@ const UploadArticleItem = (props) => {
                             <Textarea id="seo-description" name="seo-description" value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)} placeholder='SEO description' ></Textarea>
                         </div>
                     </div>
-                    <Button onClick={props.handleSubmit} size="large" className="px-6 py-1.5 mb-0.5">
-                        Publish
-                    </Button>
+                    <div className="grid grid-cols-2 gap-x-5">
+                        <div className="flex gap-1 items-center justify-end mr-1">
+                            <Checkbox id="draft"/>
+                            <label htmlFor="draft" className="text-gray-800">Draft</label>
+                        </div>
+                        <Button onClick={props.handleSubmit} size="large" className="px-6 py-1.5 mb-0.5">
+                            Publish
+                        </Button>
+                    </div>
                     <div className="max-w-md text-red-500 text-center">
                         <p>{props.submitError}</p>
+                    </div>
+                    <div className="max-w-md text-blue-500 text-center">
+                        <p>{props.submitSuccess}</p>
                     </div>
                 </div>
             </Container>

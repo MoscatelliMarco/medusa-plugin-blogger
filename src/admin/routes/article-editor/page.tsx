@@ -25,6 +25,7 @@ const ArticleEditorPage = () => {
     const [show_upload, setShowUpload] = useState(false);
     const [uploadOpened, setUploadOpened] = useState(false);
     const [submitError, setSubmitError] = useState("");
+    const [submitSuccess, setSubmitSuccess] = useState("");
     const [editor, setEditor] = useState<EditorState>(null);
     const [inputs, setInputs] = useState({
         title: "",
@@ -128,14 +129,15 @@ const ArticleEditorPage = () => {
             },
             {
                 onSuccess: async (event) => {
-                    console.log("SUCCESS")
-                    console.log(event)
-
+                    if (event.error) {
+                        setSubmitError(JSON.stringify(event))
+                    }
+                    else {
+                        setSubmitSuccess("Article uploaded successfully")
+                    }
                 },
                 onError: async (event) => {
-                    console.log("ERROR")
-                    console.log(event)
-
+                    setSubmitError(JSON.stringify(event))
                 }
             }
         )
@@ -143,7 +145,6 @@ const ArticleEditorPage = () => {
 
     const handleClick = async () => {
         const article = await getContent();
-        console.log(article)
         if (!article) {
             return
         }
@@ -164,7 +165,7 @@ const ArticleEditorPage = () => {
             subtitle: document.getElementById("subtitle")?.value,
             body: await editor?.save(),
 
-            draft: false
+            draft: document.getElementById("draft") ? (document.getElementById("draft").dataset.state == "checked") : true
         }
         return article;
     }
@@ -192,6 +193,7 @@ const ArticleEditorPage = () => {
                     inputs={inputs}
                     handleSubmit={handleClick}
                     submitError={submitError}
+                    submitSuccess={submitSuccess}
                 />
             </div>
 
