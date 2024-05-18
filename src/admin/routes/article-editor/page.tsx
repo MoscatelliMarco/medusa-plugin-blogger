@@ -19,60 +19,78 @@ import Marker from "@editorjs/marker";
 import InlineCode from "@editorjs/inline-code";
 import Underline from "@editorjs/underline";
 
-type EditorState = EditorJS | null;
-
 const ArticleEditorPage = () => {
     const [show_upload, setShowUpload] = useState(false);
     const [uploadOpened, setUploadOpened] = useState(false);
     const [submitError, setSubmitError] = useState("");
     const [submitSuccess, setSubmitSuccess] = useState("");
-    const [editor, setEditor] = useState<EditorState>(null);
     const [inputs, setInputs] = useState({
         title: "",
         subtitle: "",
     });
 
+    async function initializeEditor() {
+        return new Promise((resolve, reject) => {
+          const editor = new EditorJS({
+            holder: "editorjs",
+            placeholder: "Body",
+            tools: {
+              paragraph: {
+                class: Paragraph,
+                inlineToolbar: true,
+              },
+              header: Header,
+              quote: Quote,
+              warning: Warning,
+              delimiter: Delimiter,
+              list: {
+                class: NestedList,
+                inlineToolbar: true,
+                config: {
+                  defaultStyle: "unordered",
+                },
+              },
+              image: SimpleImage,
+              table: {
+                class: Table,
+                inlineToolbar: true,
+              },
+              code: CodeTool,
+              Marker: {
+                class: Marker,
+              },
+              inlineCode: {
+                class: InlineCode,
+              },
+              underline: Underline,
+            },
+            onReady: () => {
+              resolve(editor);
+            }
+          });
+        });
+      }
+
+      let editor;
+      async function setupEditor() {
+        try {
+          editor = await initializeEditor();
+          console.log('Editor is ready');
+        } catch (error) {
+          console.error('Error initializing editor:', error);
+        }
+      }
+
     // With MedusaJS the component is initialized two times, this is here to prevent creating multiple editors for nothing
     let runned = false;
     useEffect(() => {
         if (!runned) {
-            let editor_el = new EditorJS({
-                holder: "editorjs",
-                placeholder: "Body",
-                tools: {
-                    paragraph: {
-                        class: Paragraph,
-                        inlineToolbar: true,
-                    },
-                    header: Header,
-                    quote: Quote,
-                    warning: Warning,
-                    delimiter: Delimiter,
-                    list: {
-                        class: NestedList,
-                        inlineToolbar: true,
-                        config: {
-                            defaultStyle: "unordered",
-                        },
-                    },
-                    image: SimpleImage,
-                    table: {
-                        class: Table,
-                        inlineToolbar: true,
-                    },
-                    code: CodeTool,
-                    Marker: {
-                        class: Marker,
-                    },
-                    inlineCode: {
-                        class: InlineCode,
-                    },
-                    underline: Underline,
-                },
+            setupEditor().then(() => {
+                console.log(editor)
             });
-            setEditor(editor_el);
             const title = document.getElementById("title");
             title.addEventListener("keydown", (event) => {
+                console.log(editor)
                 if (event.key == "Enter") {
                     event.preventDefault();
                     document.getElementById("subtitle").focus();

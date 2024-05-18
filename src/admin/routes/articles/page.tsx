@@ -6,7 +6,7 @@ import {
     Funnel,
     TrianglesMini,
 } from "@medusajs/icons";
-import ArticleItem from "../../../ui-components/article_item";
+import { ArticleCard } from "../../../ui-components/article_card";
 import { Link } from "react-router-dom";
 import { Button, Input, Container } from "@medusajs/ui";
 import { useEffect, useState } from "react";
@@ -60,17 +60,10 @@ const ArticlePage = () => {
                 :
                 (
                     !error ? 
-                    (
-                        JSON.stringify(data)
-                    // <div className="grid grid-cols-3 gap-x-3 gap-y-4">
-                    //     <Container className="p-1.5">
-                    //         <ArticleItem />
-                    //     </Container>
-                    //     <Container className="p-1.5">
-                    //         <ArticleItem />
-                    //     </Container>
-                    // </div>
-                    )
+                        // JSON.stringify(data)
+                        <div className="grid grid-cols-3 w-full gap-x-3 gap-y-2.5">
+                            {data["articles"].map((article) => <ArticleCard article={article}/>)}
+                        </div>
                     :
                     (<p className={`${typeof error === 'object' ? "text-start" : "text-center"} max-w-sm text-red-500 mt-4 font-medium`}>{
                         typeof error === 'object' ? JSON.stringify(error) : error
