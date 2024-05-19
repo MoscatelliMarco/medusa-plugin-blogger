@@ -24,6 +24,7 @@ const ArticleEditorPage = () => {
     const [uploadOpened, setUploadOpened] = useState(false);
     const [submitError, setSubmitError] = useState("");
     const [submitSuccess, setSubmitSuccess] = useState("");
+    const [statusSaved, setStatusSaved] = useState("Not saved");
     const [inputs, setInputs] = useState({
         title: "",
         subtitle: "",
@@ -140,6 +141,14 @@ const ArticleEditorPage = () => {
         [""]
     )
 
+    const autoSave = async () => {
+        // Saved initial meta/seo parameters
+
+        // Listen for changes on editor and inputs
+
+        // Upload the changes with saved initial meta/seo parameters
+    }
+
     const onSubmit = async (article) => {
         return mutate(
             {
@@ -152,6 +161,8 @@ const ArticleEditorPage = () => {
                     }
                     else {
                         setSubmitSuccess("Article uploaded successfully")
+
+                        // Change initial seo/meta parameters with new one
                     }
                 },
                 onError: async (event) => {
@@ -192,7 +203,7 @@ const ArticleEditorPage = () => {
         <div className="flex flex-col gap-5">
             <div className="flex flex-col">
                 <div className="flex justify-between items-center text-xs">
-                    <p className="text-gray-400 text-sm">Saved</p>
+                    <p className="text-gray-400 text-sm">{statusSaved}</p>
                     <Button
                         className="px-5 py-1.5"
                         variant="secondary"

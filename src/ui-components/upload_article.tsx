@@ -1,25 +1,46 @@
 import TagItem from "./tag";
 import { useState, useEffect } from "react";
-import { Button, Textarea, Input, Container, Checkbox } from "@medusajs/ui";
+import { Button, Textarea, Input, Container, Checkbox, Tooltip } from "@medusajs/ui";
 
 const UploadArticleItem = (props) => {
     const [ seoTitle, setSeoTitle ] = useState(props.upload_opened ? (props.inputs.title) : "");
     const [ seoDescription, setSeoDescription ] = useState(props.upload_opened ? (props.inputs.title) : "");
     const [ urlSlug, setUrlSlug ] = useState(props.upload_opened ? (props.inputs.title) : "");
+    const [ maxHeight, setMaxHeight] = useState(1200);
 
     useEffect(() => {
         setSeoTitle(props.upload_opened ? (props.inputs.title) : "");
         setSeoDescription(props.upload_opened ? (props.inputs.subtitle) : "");
         setUrlSlug(props.upload_opened ? (slugify(props.inputs.title)) : "");
         document.getElementById("draft").click();
+
+        // Change max height accordingly to the height of the component
+        const publishContainer = document.getElementById("publish-container");
+        const resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                const height = entry.contentRect.height;
+
+                if (props.show_upload) {
+                    if (height > 500) {
+                        setMaxHeight(height);
+                    } else {
+                        setMaxHeight(1200);
+                    }
+                }
+                console.log('Height:', maxHeight);
+            }
+        });
+        
+        // Start observing the selected element
+        resizeObserver.observe(publishContainer);
     }, [props.upload_opened])
 
     return (
-        <div className={`slide-parent ${props.show_upload ? "active" : ""}`}>
+        <div id="publish-container" className={`slide-parent ${props.show_upload ? "active" : ""}`}>
             <Container className="py-5 mt-4">
                 <div className="flex flex-col items-center gap-1">
                     <div className="flex justify-center">
-                        <p className="text-center font-light text-xs text-gray-400/80 max-w-sm">*Note that these inputs are not mandatory, as their application depends on your frontend</p>
+                        <p className="text-center font-light text-xs text-gray-400/80 max-w-sm">*Note that these inputs are not mandatory, as their application depends on your frontend, and that these meta data inputs are not saved automatically but you need to press "Publish" to do so</p>
                     </div>
                     <div className="grid grid-cols-2 gap-x-5 gap-y-4 text-sm w-full p-4">
                         <div className="flex flex-col gap-0.5">
@@ -44,10 +65,10 @@ const UploadArticleItem = (props) => {
                         </div>
                         <div className="flex flex-col gap-0.5">
                             <label htmlFor="seo-description" className="text-xs text-gray-400 ml-2 font-medium">SEO description</label>
-                            <Textarea id="seo-description" name="seo-description" value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)} placeholder='SEO description' ></Textarea>
+                            <Textarea className="max-h-48" id="seo-description" name="seo-description" value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)} placeholder='SEO description' ></Textarea>
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-x-5">
+                    <div className="flex gap-5">
                         <div className="flex gap-1 items-center justify-end mr-1">
                             <Checkbox id="draft"/>
                             <label htmlFor="draft" className="text-gray-800">Draft</label>
@@ -56,11 +77,13 @@ const UploadArticleItem = (props) => {
                             Publish
                         </Button>
                     </div>
-                    <div className="max-w-md text-red-500 text-center">
-                        <p>{props.submitError}</p>
-                    </div>
-                    <div className="max-w-md text-blue-500 text-center">
-                        <p>{props.submitSuccess}</p>
+                    <div className="py-4">
+                        <div className="max-w-xl text-red-500 text-center break-words">
+                            <p>{props.submitError}</p>
+                        </div>
+                        <div className="max-w-xl text-blue-500 text-center break-words">
+                            <p>{props.submitSuccess}</p>
+                        </div>
                     </div>
                 </div>
             </Container>
@@ -73,7 +96,7 @@ const UploadArticleItem = (props) => {
                             transition: max-height 0.3s ease-in-out; /* Transition for height change */
                         }
                         .slide-parent.active {
-                            max-height: 500px;
+                            max-height: ${maxHeight}px;
                         }
                     `
                 }
