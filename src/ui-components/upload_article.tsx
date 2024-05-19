@@ -6,33 +6,12 @@ const UploadArticleItem = (props) => {
     const [ seoTitle, setSeoTitle ] = useState(props.upload_opened ? (props.inputs.title) : "");
     const [ seoDescription, setSeoDescription ] = useState(props.upload_opened ? (props.inputs.title) : "");
     const [ urlSlug, setUrlSlug ] = useState(props.upload_opened ? (props.inputs.title) : "");
-    const [ maxHeight, setMaxHeight] = useState(1200);
 
     useEffect(() => {
         setSeoTitle(props.upload_opened ? (props.inputs.title) : "");
         setSeoDescription(props.upload_opened ? (props.inputs.subtitle) : "");
         setUrlSlug(props.upload_opened ? (slugify(props.inputs.title)) : "");
         document.getElementById("draft").click();
-
-        // Change max height accordingly to the height of the component
-        const publishContainer = document.getElementById("publish-container");
-        const resizeObserver = new ResizeObserver(entries => {
-            for (let entry of entries) {
-                const height = entry.contentRect.height;
-
-                if (props.show_upload) {
-                    if (height > 500) {
-                        setMaxHeight(height);
-                    } else {
-                        setMaxHeight(1200);
-                    }
-                }
-                console.log('Height:', maxHeight);
-            }
-        });
-        
-        // Start observing the selected element
-        resizeObserver.observe(publishContainer);
     }, [props.upload_opened])
 
     return (
@@ -77,7 +56,7 @@ const UploadArticleItem = (props) => {
                             Publish
                         </Button>
                     </div>
-                    <div className="py-4">
+                    <div className={props.submitError || props.submitSuccess ? "pt-2 pb-0.5" : ""}>
                         <div className="max-w-xl text-red-500 text-center break-words">
                             <p>{props.submitError}</p>
                         </div>
@@ -92,11 +71,10 @@ const UploadArticleItem = (props) => {
                     `
                         .slide-parent {
                             overflow: hidden; /* Hide overflowing content */
-                            max-height: 0; /* Initially collapse the parent */
-                            transition: max-height 0.3s ease-in-out; /* Transition for height change */
+                            height: 0; /* Initially collapse the parent */
                         }
                         .slide-parent.active {
-                            max-height: ${maxHeight}px;
+                            height: auto;
                         }
                     `
                 }
