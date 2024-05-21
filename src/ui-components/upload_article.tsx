@@ -11,7 +11,6 @@ const UploadArticleItem = (props) => {
         setSeoTitle(props.upload_opened ? (props.inputs.title) : "");
         setSeoDescription(props.upload_opened ? (props.inputs.subtitle) : "");
         setUrlSlug(props.upload_opened ? (slugify(props.inputs.title)) : "");
-        document.getElementById("draft").click();
     }, [props.upload_opened])
 
     return (
@@ -47,14 +46,22 @@ const UploadArticleItem = (props) => {
                             <Textarea className="max-h-48" id="seo-description" name="seo-description" value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)} placeholder='SEO description' ></Textarea>
                         </div>
                     </div>
-                    <div className="flex gap-5">
-                        <div className="flex gap-1 items-center justify-end mr-1">
-                            <Checkbox id="draft"/>
-                            <label htmlFor="draft" className="text-gray-800">Draft</label>
-                        </div>
-                        <Button onClick={props.handleSubmit} size="large" className="px-6 py-1.5 mb-0.5">
-                            Publish
-                        </Button>
+                    <div className="flex justify-center">
+                        {props.draftStatus ? 
+                            <Button onClick={() => {
+                                props.handleSubmit();
+                                props.setDraftStatus(false);
+                            }} size="large" className="px-6 py-1.5 mb-0.5">
+                                Publish
+                            </Button>
+                            :
+                            <Button onClick={() => {
+                                props.handleSubmit();
+                                props.setDraftStatus(true);
+                            }} size="large" className="px-6 py-1.5 mb-0.5">
+                                Become draft
+                            </Button>
+                        }
                     </div>
                     <div className={props.submitError || props.submitSuccess ? "pt-2 pb-0.5" : ""}>
                         <div className="max-w-xl text-red-500 text-center break-words">

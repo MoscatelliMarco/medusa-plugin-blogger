@@ -25,6 +25,7 @@ const ArticleEditorPage = () => {
     const [submitError, setSubmitError] = useState("");
     const [submitSuccess, setSubmitSuccess] = useState("");
     const [statusSaved, setStatusSaved] = useState("Not saved");
+    const [draftStatus, setDraftStatus] = useState(true);
     const [inputs, setInputs] = useState({
         title: "",
         subtitle: "",
@@ -86,12 +87,17 @@ const ArticleEditorPage = () => {
     let runned = false;
     useEffect(() => {
         if (!runned) {
-            setupEditor().then(() => {
-                console.log(editor)
-            });
+            // Auto save debounce if the user doesn't write in the last 3 seconds
+            let timeoutId;
+            function debounceAutoSave() {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(autoSave, 3000);
+            }
+
+            setupEditor();
             const title = document.getElementById("title");
             title.addEventListener("keydown", (event) => {
-                console.log(editor)
+                debounceAutoSave();
                 if (event.key == "Enter") {
                     event.preventDefault();
                     document.getElementById("subtitle").focus();
@@ -99,6 +105,7 @@ const ArticleEditorPage = () => {
             });
             const subtitle = document.getElementById("subtitle") as any;
             subtitle.addEventListener("keydown", (event) => {
+                debounceAutoSave();
                 if (event.key == "Enter") {
                     event.preventDefault();
                     editor.focus();
@@ -110,6 +117,7 @@ const ArticleEditorPage = () => {
             });
             const editorContainer = document.getElementById("editorjs");
             editorContainer.addEventListener("keydown", (event) => {
+                debounceAutoSave();
                 if (event.key === "Backspace") {
                     const editorBlocks = editor.blocks.getBlocksCount();
                     if (editorBlocks === 1) {
@@ -136,40 +144,70 @@ const ArticleEditorPage = () => {
         }
     }, []);
 
+    function formatDateManually(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+    
+        return `${year}-${month}-${day}  ${hours}:${minutes}:${seconds}`;
+    }
+
+    async function blogEmpty() {
+        const articleContent = await getContent();
+        console.log(articleContent);
+        return false;
+    }
+
+    const autoSave = async () => {
+
+        // Upload the changes
+        const articleContent = getContent();
+
+        // IF THERE IS NO ERROR RUN THIS CODE
+        // Change state and show time saved
+        const dateSaved = new Date()
+        setStatusSaved(`Saved: ${formatDateManually(dateSaved)}`)
+
+        // Check if blog is empty and if yes delete it
+        const is_blog_empty = await blogEmpty();
+        if (!is_blog_empty) {
+            // Change url slug with /:id_blog_post
+            window.history.pushState({ path: `${window.location.origin}/a/article-editor/${"blog_post_id"}`}, '', `${window.location.origin}/a/article-editor/${"blog_post_id"}`)
+        } else {
+            // If blog is empty and so is deleted remove the id
+            window.history.pushState({ path: `${window.location.origin}/a/article-editor`}, '', `${window.location.origin}/a/article-editor`)
+        }
+    }
+
     const { mutate } = useAdminCustomPost(
         "/blog/articles",
         [""]
     )
-
-    const autoSave = async () => {
-        // Saved initial meta/seo parameters
-
-        // Listen for changes on editor and inputs
-
-        // Upload the changes with saved initial meta/seo parameters
-    }
-
     const onSubmit = async (article) => {
-        return mutate(
-            {
-                ...article
-            },
-            {
-                onSuccess: async (event) => {
-                    if (event.error) {
-                        setSubmitError(JSON.stringify(event))
-                    }
-                    else {
-                        setSubmitSuccess("Article uploaded successfully")
+        // return mutate(
+        //     {
+        //         ...article
+        //     },
+        //     {
+        //         onSuccess: async (event) => {
+        //             if (event.error) {
+        //                 setSubmitError(JSON.stringify(event))
+        //             }
+        //             else {
+        //                 setSubmitSuccess("Article uploaded successfully")
 
-                        // Change initial seo/meta parameters with new one
-                    }
-                },
-                onError: async (event) => {
-                    setSubmitError(JSON.stringify(event))
-                }
-            }
-        )
+        //                 // Change initial seo/meta parameters with new one
+        //             }
+        //         },
+        //         onError: async (event) => {
+        //             setSubmitError(JSON.stringify(event))
+        //         }
+        //     }
+        // )
+        console.log("Submitting button")
     }
 
     const handleClick = async () => {
@@ -194,7 +232,7 @@ const ArticleEditorPage = () => {
             subtitle: document.getElementById("subtitle")?.value,
             body: await editor?.save(),
 
-            draft: document.getElementById("draft") ? (document.getElementById("draft").dataset.state == "checked") : true
+            draft: draftStatus
         }
         return article;
     }
@@ -223,6 +261,8 @@ const ArticleEditorPage = () => {
                     handleSubmit={handleClick}
                     submitError={submitError}
                     submitSuccess={submitSuccess}
+                    draftStatus={draftStatus}
+                    setDraftStatus={setDraftStatus}
                 />
             </div>
 
