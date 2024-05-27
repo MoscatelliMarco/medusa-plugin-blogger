@@ -42,6 +42,9 @@ export class BlogArticle extends BaseEntity {
     @Column('json', { nullable: false, array: false })
     body: any; // Assuming body will be a complex JSON structure
 
+    @Column("text", { array: true, nullable: true})
+    body_images: string[];
+
     @Column({ nullable: false })
     draft: boolean;
 
