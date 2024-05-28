@@ -157,8 +157,49 @@ const ArticleEditorPage = () => {
 
     async function blogEmpty() {
         const articleContent = await getContent();
-        console.log(articleContent);
-        return false;
+
+        // Check if the blocks of the body are empty or not
+        let is_body_empty = true;
+        for (let block of articleContent.body) {
+            if (block.type == "paragraph") {
+                if (block.data.text) {
+                    is_body_empty = false;
+                }
+            } else if (block.type == "image"){
+                if (block.data.url && block.data.caption) {
+                    is_body_empty = false;
+                }
+            } 
+            else {
+                is_body_empty = false;
+            }
+        }
+
+        let is_empty = true;
+        if (articleContent.tags.length 
+            || articleContent.seo_title 
+            || articleContent.seo_keywords 
+            || articleContent.url_slug 
+            || articleContent.seo_description 
+            || articleContent.thumbnail_image
+            || articleContent.title
+            || articleContent.subtitle
+            || articleContent.body_images.length
+            || !is_body_empty
+        ) {
+            is_empty = false;
+        }
+
+        return is_empty;
+    }
+
+    const successAutoSave = () => {
+        // Change state and show time saved
+        const dateSaved = new Date()
+        setStatusSaved(`Saved: ${formatDateManually(dateSaved)}`)
+    }
+    const errorAutoSave = () => {
+        setStatusSaved("Unable to save, try again later");
     }
 
     const autoSave = async () => {
@@ -166,22 +207,34 @@ const ArticleEditorPage = () => {
         // Upload the changes
         const articleContent = getContent();
 
-        // IF THERE IS NO ERROR RUN THIS CODE
-        // Change state and show time saved
-        const dateSaved = new Date()
-        setStatusSaved(`Saved: ${formatDateManually(dateSaved)}`)
+        // There is need to understand if the blog is in the database for future logic, and it is done by checking if there is an id in the path
+        let article_id = window.location.toString().split("/article-editor/")[1];
 
         // Check if blog is empty and if yes delete it
         const is_blog_empty = await blogEmpty();
         if (!is_blog_empty) {
+            // const { mutate } = useAdminCustomPost(
+            //     "/blog/articles" + (article_id ? "/" + article_id : ""),
+            //     [""]
+            // )
+
+            mutate({
+                ...articleContent
+            }, {
+                onSuccess: successAutoSave,
+                onError: errorAutoSave
+            })
+
             // Change url slug with /:id_blog_post
             window.history.pushState({ path: `${window.location.origin}/a/article-editor/${"blog_post_id"}`}, '', `${window.location.origin}/a/article-editor/${"blog_post_id"}`)
         } else {
+            // If the blog is deleted I want the submit button to become as it would be with the draft upload and reset the page
+            setDraftStatus(true);
+
             // If blog is empty and so is deleted remove the id
             window.history.pushState({ path: `${window.location.origin}/a/article-editor`}, '', `${window.location.origin}/a/article-editor`)
         }
     }
-
     const { mutate } = useAdminCustomPost(
         "/blog/articles",
         [""]
@@ -219,6 +272,15 @@ const ArticleEditorPage = () => {
     }
 
     const getContent = async () => {
+        const body = (await editor?.save()) ? (await editor?.save())["blocks"] : [];
+        const body_images: string[] = [];
+
+        for (let block of body) {
+            if (block.type == "image") {
+                body_images.push(block.data.url)
+            }
+        }
+
         let article = {
             author: document.getElementById("author")?.value,
             tags: document.getElementById("tags")?.value ? JSON.parse(document.getElementById("tags")?.value).map(obj => obj.value) : [],
@@ -230,7 +292,8 @@ const ArticleEditorPage = () => {
             thumbnail_image: document.getElementById("thumbnail") ? document.getElementById("thumbnail").src : "",
             title: document.getElementById("title")?.value,
             subtitle: document.getElementById("subtitle")?.value,
-            body: await editor?.save(),
+            body: body,
+            body_images: [],
 
             draft: draftStatus
         }
