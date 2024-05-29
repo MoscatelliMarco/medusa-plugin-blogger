@@ -26,15 +26,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         const manager: EntityManager = req.scope.resolve("manager");
         const articleRepo = manager.getRepository(BlogArticle);
 
+        let anyreq = req as any; // Needed to not receive type errors
         const newArticle = articleRepo.create({
-            ...req.body
+            ...anyreq.body
         })
 
         await articleRepo.save(newArticle);
 
         return res.json({
             success: true,
-            article: {...req.body},
+            article: {...anyreq.body},
         })
     } catch (e) {
         return res.json({error: e.toString(), error_obj: e})
