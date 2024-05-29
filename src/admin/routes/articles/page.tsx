@@ -60,11 +60,11 @@ const ArticlePage = () => {
                 (
                     !error ? 
                         // JSON.stringify(data)
-                        (data["articles"] ? 
+                        (data["articles"] && data["articles"].length ? 
                         <div className="grid grid-cols-3 w-full gap-x-3 gap-y-2.5">
                             {data["articles"].map((article) => <ArticleCard article={article}/>)}
                         </div> :
-                        <p className="max-w-sm w-full text-center">No articles yet</p>
+                        <p className="max-w-sm w-full text-center mt-4 font-medium">No articles yet</p>
                         )
                     :
                     (<p className={`${typeof error === 'object' ? "text-start" : "text-center"} max-w-sm text-red-500 mt-4 font-medium`}>{
