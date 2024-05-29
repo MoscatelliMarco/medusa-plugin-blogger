@@ -6,7 +6,8 @@ import { BlogArticle } from "../../../../../models/blog_article"
 import { EntityManager } from "typeorm"
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
-    const blog_article_id = req.params.id;
+    let anyreq = req as any; // Needed to not receive type errors
+    const blog_article_id = anyreq.params.id;
 
     return res.json({
         success: true
