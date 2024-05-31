@@ -91,7 +91,7 @@ const ArticleEditorPage = () => {
             let timeoutId;
             function debounceAutoSave() {
                 clearTimeout(timeoutId);
-                timeoutId = setTimeout(autoSave, 3000);
+                timeoutId = setTimeout(autoSave, 2000);
             }
 
             setupEditor();
@@ -192,8 +192,22 @@ const ArticleEditorPage = () => {
 
         return is_empty;
     }
-    
-    let article_id: string = "";
+
+    // Get article ID from url
+    function getArticleIdFromUrl() {
+        return window.location.toString().split("/a/article-editor/")[1]
+    }
+
+    // Create custom logic with useState the re inits everything when there is need so the path can change and be dynamic
+    // https://chatgpt.com/c/9bca7fa2-850c-4438-8441-6902911ead49
+    const base_path = "/blog/articles"
+    const [articleId, setArticleId] = useState("");
+    const createPath = (articleId) => articleId ? base_path + "/" + articleId : base_path
+    const { mutate } = useAdminCustomPost(
+        createPath(articleId),
+        [""]
+    )
+
     const successAutoSave = (response) => {
         // Show error if there is
         if (!response.success) {
@@ -201,9 +215,12 @@ const ArticleEditorPage = () => {
         }
 
         // Save article id if there is one
-        article_id = response.article.id.split("blog_article_")[1]
-        // Change url slug with /:id_blog_post
-        window.history.pushState({ path: `${window.location.origin}/a/article-editor/${article_id}`}, '', `${window.location.origin}/a/article-editor/${article_id}`)
+        setArticleId(response.article.id.split("blog_article_")[1]);
+
+        // Change url slug with /:id_blog_post and only if path is different
+        if (`${window.location.origin}/a/article-editor/${response.article.id.split("blog_article_")[1]}` != window.location.toString()) {
+            window.history.pushState({ path: `${window.location.origin}/a/article-editor/${response.article.id.split("blog_article_")[1]}`}, '', `${window.location.origin}/a/article-editor/${response.article.id.split("blog_article_")[1]}`)
+        }
 
         // Change state and show time saved
         const dateSaved = new Date()
@@ -213,54 +230,38 @@ const ArticleEditorPage = () => {
         setStatusSaved("Unable to save, try again later");
     }
 
-    // Create custom logic with useState the re inits everything when there is need so the path can change and be dynamic
-    // https://chatgpt.com/c/9bca7fa2-850c-4438-8441-6902911ead49
-    const [path, setPath] = useState("/blog/articles");
-    const [key, setKey] = useState(0);
-    const { mutate } = useAdminCustomPost(
-        path,
-        [""]
-    )
-    const handleMutatePost = (newPath, data) => {
-        // Update the path and force re-invocation
-        setPath(newPath);
-        setKey(prevKey => prevKey + 1);
-
-        // Call the mutate function with new data after path has been updated
-        mutate({...data}, {onSuccess: successAutoSave, onError: errorAutoSave});
-    };
+    useEffect(() => {
+        // Change url slug with /:id_blog_post and only if path is different
+        window.history.pushState({ path: `${window.location.origin}/a/article-editor${articleId ? "/" + articleId : ""}`}, '', `${window.location.origin}/a/article-editor${articleId ? "/" + articleId : ""}`)
+    }, [articleId]);
 
     const autoSave = async () => {
 
         // Upload the changes
         const articleContent = await getContent();
 
-        // // There is need to understand if the blog is in the database for future logic, and it is done by checking if there is an id in the path
-        // let article_id = window.location.toString().split("/article-editor/")[1];
-
         // Check if blog is empty and if yes delete it
         const is_blog_empty = await blogEmpty();
-        if (!is_blog_empty && !article_id) {
+        if (!is_blog_empty && !getArticleIdFromUrl()) {
             // If the blog is created I want the submit button to become as it would be with the draft upload and reset the page
             setDraftStatus(true);
             // Create element
-            // TODO handle mutate not working
-            handleMutatePost("/blog/articles", articleContent);
-        } else if (!is_blog_empty && article_id) {
+            mutate({...articleContent}, {onSuccess: successAutoSave, onError: errorAutoSave});
+        } else if (!is_blog_empty && getArticleIdFromUrl()) {
             // Modify element
-            handleMutatePost("/blog/articles/" + article_id, articleContent);
+            mutate({...articleContent}, {onSuccess: successAutoSave, onError: errorAutoSave});
 
             // Change url slug with /:id_blog_post
             // window.history.pushState({ path: `${window.location.origin}/a/article-editor/${"blog_post_id"}`}, '', `${window.location.origin}/a/article-editor/${"blog_post_id"}`)
         } else {
             // Delete element
-
+            console.log("DELETE ELEMENT IN PROGRESS")
 
             // If the blog is deleted I want the submit button to become as it would be with the draft upload and reset the page
             setDraftStatus(true);
 
             // Reset article_id
-            article_id = "";
+            setArticleId("");
 
             // If blog is empty and so is deleted remove the id
             window.history.pushState({ path: `${window.location.origin}/a/article-editor`}, '', `${window.location.origin}/a/article-editor`)
@@ -324,6 +325,14 @@ const ArticleEditorPage = () => {
             body_images: [],
 
             draft: draftStatus
+        }
+        // Delete key if it is not mandatory and it does not exists
+        for (let key of Object.keys(article)) {
+            if (!["title", "body", "draft"].includes(key)) {
+                if (!article[key] || (Array.isArray(article[key]) && article[key].length)) {
+                    delete article[key]
+                }
+            }
         }
         return article;
     }

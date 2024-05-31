@@ -25,12 +25,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
             id: "blog_article_" + id
         });
         
-        article = {...anyreq.body};
+        article = {...article, ...anyreq.body};
         await articleRepo.save(article);
 
         return res.json({
             success: true,
-            article: {...anyreq.body},
+            article: article
         })
     } catch (e) {
         return res.json({success: false, error: e.toString(), error_obj: e})

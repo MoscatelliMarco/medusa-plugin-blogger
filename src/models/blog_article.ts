@@ -30,13 +30,13 @@ export class BlogArticle extends BaseEntity {
     @Column({ nullable: true, unique: true })
     seo_description: string;
 
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     thumbnail_image: string;
 
     @Column({ nullable: false })
     title: string;
 
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     subtitle: string;
 
     @Column('json', { nullable: false, array: false })
