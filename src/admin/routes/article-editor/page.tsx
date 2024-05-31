@@ -192,8 +192,19 @@ const ArticleEditorPage = () => {
 
         return is_empty;
     }
+    
+    let article_id: string = "";
+    const successAutoSave = (response) => {
+        // Show error if there is
+        if (!response.success) {
+            return setStatusSaved(`Unable to save, server error: ${response.error}`)
+        }
 
-    const successAutoSave = () => {
+        // Save article id if there is one
+        article_id = response.article.id.split("blog_article_")[1]
+        // Change url slug with /:id_blog_post
+        window.history.pushState({ path: `${window.location.origin}/a/article-editor/${article_id}`}, '', `${window.location.origin}/a/article-editor/${article_id}`)
+
         // Change state and show time saved
         const dateSaved = new Date()
         setStatusSaved(`Saved: ${formatDateManually(dateSaved)}`)
@@ -202,43 +213,60 @@ const ArticleEditorPage = () => {
         setStatusSaved("Unable to save, try again later");
     }
 
+    // Create custom logic with useState the re inits everything when there is need so the path can change and be dynamic
+    // https://chatgpt.com/c/9bca7fa2-850c-4438-8441-6902911ead49
+    const [path, setPath] = useState("/blog/articles");
+    const [key, setKey] = useState(0);
+    const { mutate } = useAdminCustomPost(
+        path,
+        [""]
+    )
+    const handleMutatePost = (newPath, data) => {
+        // Update the path and force re-invocation
+        setPath(newPath);
+        setKey(prevKey => prevKey + 1);
+
+        // Call the mutate function with new data after path has been updated
+        mutate({...data}, {onSuccess: successAutoSave, onError: errorAutoSave});
+    };
+
     const autoSave = async () => {
 
         // Upload the changes
-        const articleContent = getContent();
+        const articleContent = await getContent();
 
-        // There is need to understand if the blog is in the database for future logic, and it is done by checking if there is an id in the path
-        let article_id = window.location.toString().split("/article-editor/")[1];
+        // // There is need to understand if the blog is in the database for future logic, and it is done by checking if there is an id in the path
+        // let article_id = window.location.toString().split("/article-editor/")[1];
 
         // Check if blog is empty and if yes delete it
         const is_blog_empty = await blogEmpty();
-        if (!is_blog_empty) {
-            // const { mutate } = useAdminCustomPost(
-            //     "/blog/articles" + (article_id ? "/" + article_id : ""),
-            //     [""]
-            // )
-
-            mutate({
-                ...articleContent
-            }, {
-                onSuccess: successAutoSave,
-                onError: errorAutoSave
-            })
+        if (!is_blog_empty && !article_id) {
+            // If the blog is created I want the submit button to become as it would be with the draft upload and reset the page
+            setDraftStatus(true);
+            // Create element
+            // TODO handle mutate not working
+            handleMutatePost("/blog/articles", articleContent);
+        } else if (!is_blog_empty && article_id) {
+            // Modify element
+            handleMutatePost("/blog/articles/" + article_id, articleContent);
 
             // Change url slug with /:id_blog_post
-            window.history.pushState({ path: `${window.location.origin}/a/article-editor/${"blog_post_id"}`}, '', `${window.location.origin}/a/article-editor/${"blog_post_id"}`)
+            // window.history.pushState({ path: `${window.location.origin}/a/article-editor/${"blog_post_id"}`}, '', `${window.location.origin}/a/article-editor/${"blog_post_id"}`)
         } else {
+            // Delete element
+
+
             // If the blog is deleted I want the submit button to become as it would be with the draft upload and reset the page
             setDraftStatus(true);
+
+            // Reset article_id
+            article_id = "";
 
             // If blog is empty and so is deleted remove the id
             window.history.pushState({ path: `${window.location.origin}/a/article-editor`}, '', `${window.location.origin}/a/article-editor`)
         }
     }
-    const { mutate } = useAdminCustomPost(
-        "/blog/articles",
-        [""]
-    )
+
     const onSubmit = async (article) => {
         // return mutate(
         //     {

@@ -18,16 +18,16 @@ export class BlogArticle extends BaseEntity {
     @Column('text', { array: true, nullable: true })
     tags: string[];
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, unique: true })
     seo_title: string;
 
     @Column({ nullable: true })
     seo_keywords: string;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, unique: true })
     url_slug: string;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, unique: true })
     seo_description: string;
 
     @Column({ nullable: false })

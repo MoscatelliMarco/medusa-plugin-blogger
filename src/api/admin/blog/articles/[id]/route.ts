@@ -33,7 +33,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
             article: {...anyreq.body},
         })
     } catch (e) {
-        return res.json({error: e.toString(), error_obj: e})
+        return res.json({success: false, error: e.toString(), error_obj: e})
     }
 }
 
