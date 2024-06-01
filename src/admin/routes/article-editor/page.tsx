@@ -176,7 +176,7 @@ const ArticleEditorPage = () => {
         }
 
         let is_empty = true;
-        if (articleContent.tags.length
+        if ((articleContent.tags && articleContent.tags.length)
             || articleContent.seo_title 
             || articleContent.seo_keywords 
             || articleContent.url_slug 
@@ -330,6 +330,7 @@ const ArticleEditorPage = () => {
 
             draft: draftStatus
         }
+
         // Delete key if it is not mandatory and it does not exists
         for (let key of Object.keys(article)) {
             if (!["title", "body", "draft"].includes(key)) {
