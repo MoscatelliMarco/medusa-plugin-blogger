@@ -29,15 +29,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         let anyreq = req as any; // Needed to not receive type errors
         let article = {...anyreq.body};
 
-        // Delete key if it is not mandatory and it does not exists 
-        for (let key of Object.keys(article)) {
-            if (!["title", "body", "draft"].includes(key)) {
-                if (!article[key] || (Array.isArray(article[key]) && article[key].length)) {
-                    delete article[key]
-                }
-            }
-        }
-
         const newArticle = articleRepo.create(article)
 
         await articleRepo.save(newArticle);

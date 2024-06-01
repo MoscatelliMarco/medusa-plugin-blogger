@@ -176,7 +176,7 @@ const ArticleEditorPage = () => {
         }
 
         let is_empty = true;
-        if (articleContent.tags.length // TODO check if this is causing an error when uploading tags
+        if (articleContent.tags.length
             || articleContent.seo_title 
             || articleContent.seo_keywords 
             || articleContent.url_slug 
@@ -209,6 +209,10 @@ const ArticleEditorPage = () => {
     )
 
     const successAutoSave = (response) => {
+        console.log(`INFO - ARTICLE UPLOAD - RESPONSE`)
+        console.log(response)
+        console.log("-------------")
+
         // Show error if there is
         if (!response.success) {
             return setStatusSaved(`Unable to save, server error: ${response.error}`)
@@ -312,7 +316,7 @@ const ArticleEditorPage = () => {
 
         let article = {
             author: document.getElementById("author")?.value,
-            tags: document.getElementById("tags")?.value ? JSON.parse(document.getElementById("tags")?.value).map(obj => obj.value) : [],
+            tags: document.getElementById("tags")?.value ? (JSON.parse(document.getElementById("tags").value)).map(obj => obj.value) : [],
             seo_title: document.getElementById("seo-title")?.value,
             seo_keywords: document.getElementById("seo-keywords")?.value,
             url_slug: document.getElementById("url-slug")?.value,
@@ -329,7 +333,7 @@ const ArticleEditorPage = () => {
         // Delete key if it is not mandatory and it does not exists
         for (let key of Object.keys(article)) {
             if (!["title", "body", "draft"].includes(key)) {
-                if (!article[key] || (Array.isArray(article[key]) && article[key].length)) {
+                if (!article[key] || (Array.isArray(article[key]) && !article[key].length)) {
                     delete article[key]
                 }
             }
