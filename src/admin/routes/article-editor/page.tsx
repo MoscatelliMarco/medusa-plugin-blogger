@@ -98,7 +98,7 @@ const ArticleEditorPage = () => {
             const title = document.getElementById("title");
             title.addEventListener("keydown", (event) => {
                 debounceAutoSave();
-                if (event.key == "Enter") {
+                if (event.key == "Enter" || event.key == "ArrowDown") {
                     event.preventDefault();
                     document.getElementById("subtitle").focus();
                 }
@@ -106,10 +106,10 @@ const ArticleEditorPage = () => {
             const subtitle = document.getElementById("subtitle") as any;
             subtitle.addEventListener("keydown", (event) => {
                 debounceAutoSave();
-                if (event.key == "Enter") {
+                if (event.key == "Enter" || event.key == "ArrowDown") {
                     event.preventDefault();
                     editor.focus();
-                } else if (event.key == "Backspace") {
+                } else if (event.key == "Backspace" || event.key == "ArrowUp") {
                     if (!subtitle.value) {
                         document.getElementById("title").focus();
                     }
@@ -118,7 +118,7 @@ const ArticleEditorPage = () => {
             const editorContainer = document.getElementById("editorjs");
             editorContainer.addEventListener("keydown", (event) => {
                 debounceAutoSave();
-                if (event.key === "Backspace") {
+                if (event.key === "Backspace" || event.key == "ArrowUp") {
                     const editorBlocks = editor.blocks.getBlocksCount();
                     if (editorBlocks === 1) {
                         const firstBlock = editor.blocks.getBlockByIndex(0);
@@ -184,7 +184,7 @@ const ArticleEditorPage = () => {
             || articleContent.thumbnail_image
             || articleContent.title
             || articleContent.subtitle
-            || articleContent.body_images.length
+            || (articleContent.body_images && articleContent.body_images.length)
             || !is_body_empty
         ) {
             is_empty = false;
