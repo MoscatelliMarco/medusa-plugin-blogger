@@ -24,8 +24,18 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         let article = await articleRepo.findOneBy({
             id: "blog_article_" + id
         });
-        
         article = {...article, ...anyreq.body};
+
+        // Delete key if it is not mandatory and it does not exists
+        // This code is necessary because the article is overwritten only in the key that are not blank as they need to be removed too
+        for (let key of Object.keys(article)) {
+            if (!["title", "body", "draft"].includes(key)) {
+                if (!article[key] || (Array.isArray(article[key]) && article[key].length)) {
+                    delete article[key]
+                }
+            }
+        }
+
         await articleRepo.save(article);
 
         return res.json({

@@ -176,7 +176,7 @@ const ArticleEditorPage = () => {
         }
 
         let is_empty = true;
-        if (articleContent.tags.length 
+        if (articleContent.tags.length // TODO check if this is causing an error when uploading tags
             || articleContent.seo_title 
             || articleContent.seo_keywords 
             || articleContent.url_slug 
