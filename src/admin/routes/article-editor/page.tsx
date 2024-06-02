@@ -3,9 +3,8 @@ import EditorJS from "@editorjs/editorjs";
 import UploadArticleItem from "../../../ui-components/upload_article";
 import UploadImageItem from "../../../ui-components/upload_image";
 import { Button, Container } from "@medusajs/ui";
-import { useAdminCustomPost, useAdminCustomDelete } from "medusa-react";
-import { useSearchParams } from 'react-router-dom';
-import { listenChangesSave } from "../../../javascript/utils";
+import { useAdminCustomQuery, useAdminCustomPost, useAdminCustomDelete } from "medusa-react";
+import { listenChangesSave, getIdFromCurrentUrl, addIdFromCurrentUrl, removeIdFromCurrentUrl, createPathRequest } from "../../../javascript/utils";
 
 // Editor JS plugins
 import Paragraph from "@editorjs/paragraph";
@@ -33,11 +32,14 @@ const ArticleEditorPage = () => {
         subtitle: "",
     });
 
-    // If the id exists save it
-    const [searchParams] = useSearchParams();
-    useEffect(() => {
-        // console.log(searchParams)
-    }, [searchParams.get("id")])
+    // Load article if there is an existing id
+    const loaded_article_id = getIdFromCurrentUrl();
+    if (loaded_article_id) {
+        // const { data, isLoading } = useAdminCustomQuery(
+        //     createPathRequest(loaded_article_id),
+        //     []
+        // )
+    }
 
     // Auto save debounce if the user doesn't write in the last N seconds
     let timeoutId;
@@ -209,22 +211,17 @@ const ArticleEditorPage = () => {
         return is_empty;
     }
 
-    // Get article ID from url
-    function getArticleIdFromUrl() {
-        return window.location.toString().split("/a/article-editor/")[1]
-    }
-
     // Create custom logic with useState the re inits everything when there is need so the path can change and be dynamic
     // https://chatgpt.com/c/9bca7fa2-850c-4438-8441-6902911ead49
-    const base_path = "/blog/articles"
-    const [articleId, setArticleId] = useState("");
-    const createPath = (articleId) => articleId ? base_path + "/" + articleId : base_path
+    const [articleId, setArticleId] = useState(getIdFromCurrentUrl() ? getIdFromCurrentUrl() : "");
+
+    // Query parameters are used for the frontend code and req parameters for the backend because it is more easy to work with urls in this way
     const customPost = useAdminCustomPost(
-        createPath(articleId), []
+        createPathRequest(articleId), []
     )
     const mutatePost = customPost.mutate;
     const customDelete = useAdminCustomDelete(
-        createPath(articleId), []
+        createPathRequest(articleId), []
     )
     const mutateDelete = customDelete.mutate;
 
@@ -250,8 +247,9 @@ const ArticleEditorPage = () => {
             setStatusSaved("Article deleted because the content is empty")
 
             // If blog is empty and so is deleted remove the id
-            if (`${window.location.origin}/a/article-editor` != window.location.toString()) {
-                window.history.pushState({ path: `${window.location.origin}/a/article-editor`}, '', `${window.location.origin}/a/article-editor`)
+            const newUrl = removeIdFromCurrentUrl();
+            if (newUrl != window.location.toString()) {
+                window.history.pushState({ path: newUrl}, '', newUrl);
             }
             
             return;
@@ -260,22 +258,21 @@ const ArticleEditorPage = () => {
         setArticleId(response.article.id.split("blog_article_")[1]);
 
         // Change url slug with /:id_blog_post and only if path is different
-        if (`${window.location.origin}/a/article-editor/${response.article.id.split("blog_article_")[1]}` != window.location.toString()) {
-            window.history.pushState({ path: `${window.location.origin}/a/article-editor/${response.article.id.split("blog_article_")[1]}`}, '', `${window.location.origin}/a/article-editor/${response.article.id.split("blog_article_")[1]}`)
+        const newUrl = addIdFromCurrentUrl(response.article.id.split("blog_article_")[1])
+        if (newUrl != window.location.toString()) {
+            window.history.pushState({ path: newUrl}, '', newUrl)
         }
 
         // Change state and show time saved
-        const dateSaved = new Date()
+        const dateSaved = new Date();
         setStatusSaved(`Saved: ${formatDateManually(dateSaved)}`)
+
+        // If the blog is created I want the submit button to become as it would be with the draft upload and reset the page
+        setDraftStatus(true);
     }
     const errorAutoSave = () => {
         setStatusSaved("Unable to save, try again later");
     }
-
-    useEffect(() => {
-        // Change url slug with /:id_blog_post and only if path is different
-        window.history.pushState({ path: `${window.location.origin}/a/article-editor${articleId ? "/" + articleId : ""}`}, '', `${window.location.origin}/a/article-editor${articleId ? "/" + articleId : ""}`)
-    }, [articleId]);
 
     const autoSave = async () => {
 
@@ -284,21 +281,15 @@ const ArticleEditorPage = () => {
 
         // Check if blog is empty and if yes delete it
         const is_blog_empty = await blogEmpty();
-        if (!is_blog_empty && !getArticleIdFromUrl()) {
-            // If the blog is created I want the submit button to become as it would be with the draft upload and reset the page
-            setDraftStatus(true);
+        if (!is_blog_empty && !getIdFromCurrentUrl()) {
             // Create element
             mutatePost({...articleContent}, {onSuccess: successAutoSave, onError: errorAutoSave});
-        } else if (!is_blog_empty && getArticleIdFromUrl()) {
+        } else if (!is_blog_empty && getIdFromCurrentUrl()) {
             // Modify element
             mutatePost({...articleContent}, {onSuccess: successAutoSave, onError: errorAutoSave});
-
-            // Change url slug with /:id_blog_post
-            // window.history.pushState({ path: `${window.location.origin}/a/article-editor/${"blog_post_id"}`}, '', `${window.location.origin}/a/article-editor/${"blog_post_id"}`)
         } else {
             // Delete element
-            console.log("DELETE ELEMENT IN PROGRESS")
-            mutateDelete({id: getArticleIdFromUrl()}, {onSuccess: successAutoSave, onError: errorAutoSave})
+            mutateDelete({id: getIdFromCurrentUrl()}, {onSuccess: successAutoSave, onError: errorAutoSave})
         }
     }
 
@@ -325,7 +316,7 @@ const ArticleEditorPage = () => {
     }
 
     const handleClick = async () => {
-        if (!getArticleIdFromUrl() || blogEmpty()) {
+        if (!getIdFromCurrentUrl() || blogEmpty()) {
             return setSubmitError("You cannot changed draft status if the article is empty")
         }
         onSubmit()
