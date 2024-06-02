@@ -4,6 +4,7 @@ import UploadArticleItem from "../../../ui-components/upload_article";
 import UploadImageItem from "../../../ui-components/upload_image";
 import { Button, Container } from "@medusajs/ui";
 import { useAdminCustomPost } from "medusa-react";
+import { useSearchParams } from 'react-router-dom';
 
 // Editor JS plugins
 import Paragraph from "@editorjs/paragraph";
@@ -30,6 +31,12 @@ const ArticleEditorPage = () => {
         title: "",
         subtitle: "",
     });
+
+    // If the id exists save it
+    const [searchParams] = useSearchParams();
+    useEffect(() => {
+        console.log(searchParams)
+    }, [searchParams.get("id")])
 
     async function initializeEditor() {
         return new Promise((resolve, reject) => {
@@ -272,36 +279,33 @@ const ArticleEditorPage = () => {
         }
     }
 
-    const onSubmit = async (article) => {
-        // return mutate(
-        //     {
-        //         ...article
-        //     },
-        //     {
-        //         onSuccess: async (event) => {
-        //             if (event.error) {
-        //                 setSubmitError(JSON.stringify(event))
-        //             }
-        //             else {
-        //                 setSubmitSuccess("Article uploaded successfully")
-
-        //                 // Change initial seo/meta parameters with new one
-        //             }
-        //         },
-        //         onError: async (event) => {
-        //             setSubmitError(JSON.stringify(event))
-        //         }
-        //     }
-        // )
-        console.log("Submitting button")
+    const onSubmit = async () => {
+        return mutate(
+            {
+                changed_draft_status: true, // Needed so the backend can recognize to change only the draft column
+                draft: draftStatus
+            },
+            {
+                onSuccess: async (event) => {
+                    if (event.error) {
+                        setSubmitError(JSON.stringify(event))
+                    }
+                    else {
+                        setSubmitSuccess("Draft status changed successfully")
+                    }
+                },
+                onError: async (event) => {
+                    setSubmitError(JSON.stringify(event))
+                }
+            }
+        )
     }
 
     const handleClick = async () => {
-        const article = await getContent();
-        if (!article) {
+        if (!getArticleIdFromUrl() || blogEmpty()) {
             return
         }
-        onSubmit(article)
+        onSubmit()
     }
 
     const getContent = async () => {
