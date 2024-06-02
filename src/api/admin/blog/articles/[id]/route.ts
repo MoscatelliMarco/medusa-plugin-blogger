@@ -52,10 +52,21 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 }
 
 export const DELETE = async (req: MedusaRequest, res: MedusaResponse) => {
-    let anyreq = req as any; // Needed to not receive type errors
-    const blog_article_id = anyreq.params.id;
-    
-    return res.json({
-        success: true
-    })
+    try {
+        const manager: EntityManager = req.scope.resolve("manager");
+        const articleRepo = manager.getRepository(BlogArticle);
+
+        let anyreq = req as any; // Needed to not receive type errors
+        const id = anyreq.params.id;
+        let article = await articleRepo.delete({
+            id: "blog_article_" + id
+        });
+
+        return res.json({
+            success: true,
+            article: article
+        })
+    } catch (e) {
+        return res.json({success: false, error: e.toString(), error_obj: e})
+    }
 }

@@ -3,8 +3,9 @@ import EditorJS from "@editorjs/editorjs";
 import UploadArticleItem from "../../../ui-components/upload_article";
 import UploadImageItem from "../../../ui-components/upload_image";
 import { Button, Container } from "@medusajs/ui";
-import { useAdminCustomPost } from "medusa-react";
+import { useAdminCustomPost, useAdminCustomDelete } from "medusa-react";
 import { useSearchParams } from 'react-router-dom';
+import { listenChangesSave } from "../../../javascript/utils";
 
 // Editor JS plugins
 import Paragraph from "@editorjs/paragraph";
@@ -35,8 +36,15 @@ const ArticleEditorPage = () => {
     // If the id exists save it
     const [searchParams] = useSearchParams();
     useEffect(() => {
-        console.log(searchParams)
+        // console.log(searchParams)
     }, [searchParams.get("id")])
+
+    // Auto save debounce if the user doesn't write in the last N seconds
+    let timeoutId;
+    function debounceAutoSave() {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(autoSave, 2000);
+    }
 
     async function initializeEditor() {
         return new Promise((resolve, reject) => {
@@ -75,6 +83,9 @@ const ArticleEditorPage = () => {
             },
             onReady: () => {
               resolve(editor);
+            },
+            onChange: () => {
+                debounceAutoSave();
             }
           });
         });
@@ -94,17 +105,14 @@ const ArticleEditorPage = () => {
     let runned = false;
     useEffect(() => {
         if (!runned) {
-            // Auto save debounce if the user doesn't write in the last 3 seconds
-            let timeoutId;
-            function debounceAutoSave() {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(autoSave, 2000);
-            }
 
             setupEditor();
+
+            // Add listeners to every input for autoSave
+            listenChangesSave(debounceAutoSave); 
+
             const title = document.getElementById("title");
             title.addEventListener("keydown", (event) => {
-                debounceAutoSave();
                 if (event.key == "Enter" || event.key == "ArrowDown") {
                     event.preventDefault();
                     document.getElementById("subtitle").focus();
@@ -112,7 +120,6 @@ const ArticleEditorPage = () => {
             });
             const subtitle = document.getElementById("subtitle") as any;
             subtitle.addEventListener("keydown", (event) => {
-                debounceAutoSave();
                 if (event.key == "Enter" || event.key == "ArrowDown") {
                     event.preventDefault();
                     editor.focus();
@@ -123,8 +130,10 @@ const ArticleEditorPage = () => {
                 }
             });
             const editorContainer = document.getElementById("editorjs");
-            editorContainer.addEventListener("keydown", (event) => {
-                debounceAutoSave();
+            editorContainer.addEventListener("change", (event) => {
+                // NOTE: 
+                // there is no debounceAutoSave here because it is runned inside the onChange property of the editor
+                // because if it was runned here I would apply only to key press actions
                 if (event.key === "Backspace" || event.key == "ArrowUp") {
                     const editorBlocks = editor.blocks.getBlocksCount();
                     if (editorBlocks === 1) {
@@ -210,13 +219,17 @@ const ArticleEditorPage = () => {
     const base_path = "/blog/articles"
     const [articleId, setArticleId] = useState("");
     const createPath = (articleId) => articleId ? base_path + "/" + articleId : base_path
-    const { mutate } = useAdminCustomPost(
-        createPath(articleId),
-        [""]
+    const customPost = useAdminCustomPost(
+        createPath(articleId), []
     )
+    const mutatePost = customPost.mutate;
+    const customDelete = useAdminCustomDelete(
+        createPath(articleId), []
+    )
+    const mutateDelete = customDelete.mutate;
 
-    const successAutoSave = (response) => {
-        console.log(`INFO - ARTICLE UPLOAD - RESPONSE`)
+    const successAutoSave = async (response) => {
+        console.log(`INFO - ARTICLE UPLOAD/DELETE - RESPONSE`)
         console.log(response)
         console.log("-------------")
 
@@ -225,6 +238,24 @@ const ArticleEditorPage = () => {
             return setStatusSaved(`Unable to save, server error: ${response.error}`)
         }
 
+        // If page is blank that means that the article is deleted, show a message
+        if (await blogEmpty()) {
+            // If the blog is deleted I want the submit button to become as it would be with the draft upload and reset the page
+            setDraftStatus(true);
+
+            // Reset article_id
+            setArticleId("");
+
+            // Change saved status to deleted
+            setStatusSaved("Article deleted because the content is empty")
+
+            // If blog is empty and so is deleted remove the id
+            if (`${window.location.origin}/a/article-editor` != window.location.toString()) {
+                window.history.pushState({ path: `${window.location.origin}/a/article-editor`}, '', `${window.location.origin}/a/article-editor`)
+            }
+            
+            return;
+        }
         // Save article id if there is one
         setArticleId(response.article.id.split("blog_article_")[1]);
 
@@ -257,30 +288,22 @@ const ArticleEditorPage = () => {
             // If the blog is created I want the submit button to become as it would be with the draft upload and reset the page
             setDraftStatus(true);
             // Create element
-            mutate({...articleContent}, {onSuccess: successAutoSave, onError: errorAutoSave});
+            mutatePost({...articleContent}, {onSuccess: successAutoSave, onError: errorAutoSave});
         } else if (!is_blog_empty && getArticleIdFromUrl()) {
             // Modify element
-            mutate({...articleContent}, {onSuccess: successAutoSave, onError: errorAutoSave});
+            mutatePost({...articleContent}, {onSuccess: successAutoSave, onError: errorAutoSave});
 
             // Change url slug with /:id_blog_post
             // window.history.pushState({ path: `${window.location.origin}/a/article-editor/${"blog_post_id"}`}, '', `${window.location.origin}/a/article-editor/${"blog_post_id"}`)
         } else {
             // Delete element
             console.log("DELETE ELEMENT IN PROGRESS")
-
-            // If the blog is deleted I want the submit button to become as it would be with the draft upload and reset the page
-            setDraftStatus(true);
-
-            // Reset article_id
-            setArticleId("");
-
-            // If blog is empty and so is deleted remove the id
-            window.history.pushState({ path: `${window.location.origin}/a/article-editor`}, '', `${window.location.origin}/a/article-editor`)
+            mutateDelete({id: getArticleIdFromUrl()}, {onSuccess: successAutoSave, onError: errorAutoSave})
         }
     }
 
     const onSubmit = async () => {
-        return mutate(
+        return mutatePost(
             {
                 changed_draft_status: true, // Needed so the backend can recognize to change only the draft column
                 draft: draftStatus
@@ -303,7 +326,7 @@ const ArticleEditorPage = () => {
 
     const handleClick = async () => {
         if (!getArticleIdFromUrl() || blogEmpty()) {
-            return
+            return setSubmitError("You cannot changed draft status if the article is empty")
         }
         onSubmit()
     }
