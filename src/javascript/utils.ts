@@ -18,25 +18,6 @@ export const listenChangesSave = (debounceAutoSave) => {
     seo_description.addEventListener("keyup", () => debounceAutoSave())
 }
 
-export const getIdFromCurrentUrl = () => {
-    const urlObj = new URL(window.location.href);
-    return urlObj.searchParams.get('id');
-}
-
-export const addIdFromCurrentUrl = (id) => {
-    const urlObj = new URL(window.location.href);
-    urlObj.searchParams.set('id', id);
-    return urlObj.toString();
-}
-
-export const removeIdFromCurrentUrl = () => {
-    const urlObj = new URL(window.location.href);
-    urlObj.searchParams.delete('id');
-    return urlObj.toString();
-}
-
-export const createPathRequest = (articleId, base_path = "/blog/articles") => articleId ? base_path + "/" + articleId : base_path
-
 export const loadArticle = (article) => {
     // TODO Load every article key into the frontend components
     console.log(article)
@@ -70,3 +51,22 @@ export const formatDateManually = (date) => {
 
     return `${year}-${month}-${day}  ${hours}:${minutes}:${seconds}`;
 }
+
+export const getIdFromCurrentUrl = () => {
+    const urlObj = new URL(window.location.href);
+    return urlObj.searchParams.get('id');
+}
+
+export const addIdFromCurrentUrl = (id) => {
+    const urlObj = new URL(window.location.href);
+    urlObj.searchParams.set('id', id);
+    return urlObj.toString();
+}
+
+export const removeIdFromCurrentUrl = () => {
+    const urlObj = new URL(window.location.href);
+    urlObj.searchParams.delete('id');
+    return urlObj.toString();
+}
+
+export const createPathRequest = (articleId, base_path = "/blog/articles") => articleId ? base_path + "/" + articleId : base_path
