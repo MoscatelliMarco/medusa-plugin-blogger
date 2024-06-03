@@ -1,6 +1,5 @@
 import TagItem from "./tag";
-import { useState, useEffect } from "react";
-import { Button, Textarea, Input, Container, Checkbox, Tooltip } from "@medusajs/ui";
+import { Button, Textarea, Input, Container } from "@medusajs/ui";
 
 const UploadArticleItem = (props) => {
 
@@ -9,7 +8,7 @@ const UploadArticleItem = (props) => {
             <Container className="py-5 mt-4">
                 <div className="flex flex-col items-center gap-1">
                     <div className="flex justify-center">
-                        <p className="text-center font-light text-xs text-gray-400/80 max-w-sm">*Note that these inputs are not mandatory, as their application depends on your frontend, and that these meta data inputs are not saved automatically but you need to press "Publish" to do so</p>
+                        <p className="text-center font-light text-xs text-gray-400/80 max-w-sm">Note that these inputs are not mandatory, as their use depends on your frontend</p>
                     </div>
                     <div className="grid grid-cols-2 gap-x-5 gap-y-4 text-sm w-full p-4">
                         <div className="flex flex-col gap-0.5">
