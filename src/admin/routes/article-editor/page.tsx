@@ -4,7 +4,7 @@ import UploadArticleItem from "../../../ui-components/upload_article";
 import UploadImageItem from "../../../ui-components/upload_image";
 import { Button, Container } from "@medusajs/ui";
 import { useAdminCustomQuery, useAdminCustomPost, useAdminCustomDelete } from "medusa-react";
-import { listenChangesSave, getIdFromCurrentUrl, addIdFromCurrentUrl, removeIdFromCurrentUrl, createPathRequest, loadArticle } from "../../../javascript/utils";
+import { listenChangesSave, getIdFromCurrentUrl, addIdFromCurrentUrl, removeIdFromCurrentUrl, createPathRequest, loadArticle, formatDateManually } from "../../../javascript/utils";
 
 // Editor JS plugins
 import Paragraph from "@editorjs/paragraph";
@@ -36,26 +36,34 @@ const ArticleEditorPage = () => {
     // Load article if there is an existing id
     // TODO this now needs state to work properly
     const loaded_article_id = getIdFromCurrentUrl();
-    let data;
-    let isLoading = true;
+    const [ isArticleLoading, setIsArticleLoading ] = useState(true);
     if (loaded_article_id) {
-        console.log(loaded_article_id)
-        let getRequest = useAdminCustomQuery(
+        const { data, isLoading } = useAdminCustomQuery(
             createPathRequest(loaded_article_id),
             []
         )
-        data = getRequest.data;
-        isLoading = getRequest.isLoading;
+
+        useEffect(() => {
+            if (!isLoading) {
+                setIsArticleLoading(isLoading);
+
+                if (data.article) {
+                    loadArticle(data.article);
+
+                    // Save time article loaded
+                    const dateSaved = new Date();
+                    setStatusSaved(`Loaded at ${formatDateManually(dateSaved)}`)
+                } else {
+                    setIsIdValid(false);
+                }
+            }
+
+        }, [isLoading])
+    } else {
+        useEffect(() => {
+            setIsArticleLoading(false);
+        }, [])
     }
-    useEffect(() => {
-        if (data && data.article) {
-            // If article exists load it
-            loadArticle(data.article);
-        } else {
-            // If article does not exist show 404 error
-            setIsIdValid(false);
-        }
-    }, [isLoading])
 
     // Auto save debounce if the user doesn't write in the last N seconds
     let timeoutId;
@@ -178,17 +186,6 @@ const ArticleEditorPage = () => {
         }
     }, []);
 
-    function formatDateManually(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-    
-        return `${year}-${month}-${day}  ${hours}:${minutes}:${seconds}`;
-    }
-
     async function blogEmpty() {
         const articleContent = await getContent();
 
@@ -281,7 +278,7 @@ const ArticleEditorPage = () => {
 
         // Change state and show time saved
         const dateSaved = new Date();
-        setStatusSaved(`Saved: ${formatDateManually(dateSaved)}`)
+        setStatusSaved(`Saved at ${formatDateManually(dateSaved)}`)
 
         // If the blog is created I want the submit button to become as it would be with the draft upload and reset the page
         setDraftStatus(true);
@@ -378,10 +375,10 @@ const ArticleEditorPage = () => {
 
     return (
         <div>
-            <div className={`${isLoading ? "" : "hidden"} grid place-items-center my-5`}>
+            <div className={`${isArticleLoading ? "" : "hidden"} grid place-items-center my-5`}>
                 <p className="font-light">Loading article...</p>
             </div>
-            <div className={`${isLoading ? "hidden" : ""}`}>
+            <div className={`${isArticleLoading ? "hidden" : ""}`}>
                 {
                     isIdValid ? 
                     (

@@ -3,15 +3,6 @@ import { useState, useEffect } from "react";
 import { Button, Textarea, Input, Container, Checkbox, Tooltip } from "@medusajs/ui";
 
 const UploadArticleItem = (props) => {
-    const [ seoTitle, setSeoTitle ] = useState(props.upload_opened ? (props.inputs.title) : "");
-    const [ seoDescription, setSeoDescription ] = useState(props.upload_opened ? (props.inputs.title) : "");
-    const [ urlSlug, setUrlSlug ] = useState(props.upload_opened ? (props.inputs.title) : "");
-
-    useEffect(() => {
-        setSeoTitle(props.upload_opened ? (props.inputs.title) : "");
-        setSeoDescription(props.upload_opened ? (props.inputs.subtitle) : "");
-        setUrlSlug(props.upload_opened ? (slugify(props.inputs.title)) : "");
-    }, [props.upload_opened])
 
     return (
         <div id="publish-container" className={`slide-parent ${props.show_upload ? "active" : ""}`}>
@@ -31,7 +22,7 @@ const UploadArticleItem = (props) => {
                         </div>
                         <div className="flex flex-col gap-0.5">
                             <label htmlFor="seo-title" className="text-xs text-gray-400 ml-2 font-medium">SEO title</label>
-                            <Input id="seo-title" name="seo-title" value={seoTitle} onChange={(event) => setSeoTitle(event.target.value)} placeholder='SEO title' type="text" />
+                            <Input id="seo-title" name="seo-title" placeholder='SEO title' type="text" />
                         </div>
                         <div className="flex flex-col gap-0.5">
                             <label htmlFor="seo-keywords" className="text-xs text-gray-400 ml-2 font-medium">SEO keywords</label>
@@ -39,11 +30,11 @@ const UploadArticleItem = (props) => {
                         </div>
                         <div className="flex flex-col gap-0.5">
                             <label htmlFor="url-slug" className="text-xs text-gray-400 ml-2 font-medium">Url slug</label>
-                            <Input id="url-slug" value={urlSlug} onChange={(event) => setUrlSlug(event.target.value)} placeholder='Url slug' type="text" />
+                            <Input id="url-slug" onChange={(event) => event.target.value = slugify(event.target.value)} placeholder='Url slug' type="text" />
                         </div>
                         <div className="flex flex-col gap-0.5">
                             <label htmlFor="seo-description" className="text-xs text-gray-400 ml-2 font-medium">SEO description</label>
-                            <Textarea className="max-h-48" id="seo-description" name="seo-description" value={seoDescription} onChange={(event) => setSeoDescription(event.target.value)} placeholder='SEO description' ></Textarea>
+                            <Textarea className="max-h-48" id="seo-description" name="seo-description" placeholder='SEO description' ></Textarea>
                         </div>
                     </div>
                     <div className="flex justify-center">
