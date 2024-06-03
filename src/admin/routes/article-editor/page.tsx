@@ -4,7 +4,7 @@ import UploadArticleItem from "../../../ui-components/upload_article";
 import UploadImageItem from "../../../ui-components/upload_image";
 import { Button, Container } from "@medusajs/ui";
 import { useAdminCustomQuery, useAdminCustomPost, useAdminCustomDelete } from "medusa-react";
-import { listenChangesSave, getIdFromCurrentUrl, addIdFromCurrentUrl, removeIdFromCurrentUrl, createPathRequest } from "../../../javascript/utils";
+import { listenChangesSave, getIdFromCurrentUrl, addIdFromCurrentUrl, removeIdFromCurrentUrl, createPathRequest, loadArticle } from "../../../javascript/utils";
 
 // Editor JS plugins
 import Paragraph from "@editorjs/paragraph";
@@ -27,19 +27,35 @@ const ArticleEditorPage = () => {
     const [submitSuccess, setSubmitSuccess] = useState("");
     const [statusSaved, setStatusSaved] = useState("Not saved");
     const [draftStatus, setDraftStatus] = useState(true);
+    const [ isIdValid, setIsIdValid ] = useState(true);
     const [inputs, setInputs] = useState({
         title: "",
         subtitle: "",
     });
 
     // Load article if there is an existing id
+    // TODO this now needs state to work properly
     const loaded_article_id = getIdFromCurrentUrl();
+    let data;
+    let isLoading = true;
     if (loaded_article_id) {
-        // const { data, isLoading } = useAdminCustomQuery(
-        //     createPathRequest(loaded_article_id),
-        //     []
-        // )
+        console.log(loaded_article_id)
+        let getRequest = useAdminCustomQuery(
+            createPathRequest(loaded_article_id),
+            []
+        )
+        data = getRequest.data;
+        isLoading = getRequest.isLoading;
     }
+    useEffect(() => {
+        if (data && data.article) {
+            // If article exists load it
+            loadArticle(data.article);
+        } else {
+            // If article does not exist show 404 error
+            setIsIdValid(false);
+        }
+    }, [isLoading])
 
     // Auto save debounce if the user doesn't write in the last N seconds
     let timeoutId;
@@ -361,97 +377,119 @@ const ArticleEditorPage = () => {
     }
 
     return (
-        <div className="flex flex-col gap-5">
-            <div className="flex flex-col">
-                <div className="flex justify-between items-center text-xs">
-                    <p className="text-gray-400 text-sm">{statusSaved}</p>
-                    <Button
-                        className="px-5 py-1.5"
-                        variant="secondary"
-                        onClick={() => {
-                            setShowUpload(!show_upload);
-                            setUploadOpened(true);
-                        }}
-                        size="small"
-                    >
-                        Upload
-                    </Button>
-                </div>
-                <UploadArticleItem
-                    show_upload={show_upload}
-                    upload_opened={uploadOpened}
-                    inputs={inputs}
-                    handleSubmit={handleClick}
-                    submitError={submitError}
-                    submitSuccess={submitSuccess}
-                    draftStatus={draftStatus}
-                    setDraftStatus={setDraftStatus}
-                />
+        <div>
+            <div className={`${isLoading ? "" : "hidden"} grid place-items-center my-5`}>
+                <p className="font-light">Loading article...</p>
             </div>
+            <div className={`${isLoading ? "hidden" : ""}`}>
+                {
+                    isIdValid ? 
+                    (
+                        <div className="flex flex-col gap-5">
+                            <div className="flex flex-col">
+                                <div className="flex justify-between items-center text-xs">
+                                    <p className="text-gray-400 text-sm">{statusSaved}</p>
+                                    <Button
+                                        className="px-5 py-1.5"
+                                        variant="secondary"
+                                        onClick={() => {
+                                            setShowUpload(!show_upload);
+                                            setUploadOpened(true);
+                                        }}
+                                        size="small"
+                                    >
+                                        Upload
+                                    </Button>
+                                </div>
+                                <UploadArticleItem
+                                    show_upload={show_upload}
+                                    upload_opened={uploadOpened}
+                                    inputs={inputs}
+                                    handleSubmit={handleClick}
+                                    submitError={submitError}
+                                    submitSuccess={submitSuccess}
+                                    draftStatus={draftStatus}
+                                    setDraftStatus={setDraftStatus}
+                                />
+                            </div>
 
-            <Container className="flex flex-col items-center gap-6 p-5">
-                <UploadImageItem />
+                            <Container className="flex flex-col items-center gap-6 p-5">
+                                <UploadImageItem />
 
-                <div className="flex flex-col gap-0.5 px-12 max-w-5xl w-full">
-                    <textarea
-                        rows={1}
-                        className="auto-resize overflow-hidden resize-none h-auto font-semibold text-4xl text-gray-700 bg-transparent focus:outline-none auto-height-input"
-                        placeholder="Title"
-                        onChange={(event) => {
-                            setInputs({ ...inputs, title: event.target.value });
-                        }}
-                        name="title"
-                        id="title"
-                    ></textarea>
-                    <textarea
-                        rows={1}
-                        className="auto-resize overflow-hidden resize-none font-medium h-auto text-xl text-gray-500 bg-transparent focus:outline-none auto-height-input"
-                        placeholder="Subtitle"
-                        onChange={(event) => {
-                            setInputs({
-                                ...inputs,
-                                subtitle: event.target.value,
-                            });
-                        }}
-                        name="subtitle"
-                        id="subtitle"
-                    ></textarea>
-                    <div
-                        id="editorjs"
-                        className="text-gray-700 break-words mt-1"
-                    ></div>
-                </div>
-            </Container>
+                                <div className="flex flex-col gap-0.5 px-12 max-w-5xl w-full">
+                                    <textarea
+                                        rows={1}
+                                        className="auto-resize overflow-hidden resize-none h-auto font-semibold text-4xl text-gray-700 bg-transparent focus:outline-none auto-height-input"
+                                        placeholder="Title"
+                                        onChange={(event) => {
+                                            setInputs({ ...inputs, title: event.target.value });
+                                        }}
+                                        name="title"
+                                        id="title"
+                                    ></textarea>
+                                    <textarea
+                                        rows={1}
+                                        className="auto-resize overflow-hidden resize-none font-medium h-auto text-xl text-gray-500 bg-transparent focus:outline-none auto-height-input"
+                                        placeholder="Subtitle"
+                                        onChange={(event) => {
+                                            setInputs({
+                                                ...inputs,
+                                                subtitle: event.target.value,
+                                            });
+                                        }}
+                                        name="subtitle"
+                                        id="subtitle"
+                                    ></textarea>
+                                    <div
+                                        id="editorjs"
+                                        className="text-gray-700 break-words mt-1"
+                                    ></div>
+                                </div>
+                            </Container>
 
-            <style>
-                {`
-                    .ce-block__content, 
-                    .ce-toolbar__content {
-                     max-width: 100%; 
-                    }
-                    .ce-toolbar__plus svg path {
-                        stroke: rgb(55 65 81);
-                    }
-                    h1 {
-                        font-size: 2rem;
-                    }
-                    h2 {
-                        font-size: 1.5rem;
-                    }
-                    h3 {
-                        font-size: 1.17rem;
-                    }
-                    h4 {
-                        font-size: 1rem;
-                    }
-                    h5 {
-                        font-size: 0.83rem;
-                    }
-                    h6 {
-                        font-size: 0.67rem;
-                    }
-                    `}
-            </style>
+                            <style>
+                                {`
+                                    .ce-block__content, 
+                                    .ce-toolbar__content {
+                                    max-width: 100%; 
+                                    }
+                                    .ce-toolbar__plus svg path {
+                                        stroke: rgb(55 65 81);
+                                    }
+                                    h1 {
+                                        font-size: 2rem;
+                                    }
+                                    h2 {
+                                        font-size: 1.5rem;
+                                    }
+                                    h3 {
+                                        font-size: 1.17rem;
+                                    }
+                                    h4 {
+                                        font-size: 1rem;
+                                    }
+                                    h5 {
+                                        font-size: 0.83rem;
+                                    }
+                                    h6 {
+                                        font-size: 0.67rem;
+                                    }
+                                    `}
+                            </style>
+                        </div>
+                    ) :
+                    (
+                        <div className="flex flex-col items-center my-5">
+                            <h6 className="font-bold text-2xl">
+                                404
+                            </h6>
+                            <p className="text-sm max-w-sm text-center">
+                                The ID in the query does not correspond to any article
+                            </p>
+                        </div>
+                    )
+                }
+            </div>
         </div>
     );
 };

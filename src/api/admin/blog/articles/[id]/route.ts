@@ -6,12 +6,23 @@ import { BlogArticle } from "../../../../../models/blog_article"
 import { EntityManager } from "typeorm"
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
-    let anyreq = req as any; // Needed to not receive type errors
-    const blog_article_id = anyreq.params.id;
+    try {
+        const manager: EntityManager = req.scope.resolve("manager");
+        const articleRepo = manager.getRepository(BlogArticle);
 
-    return res.json({
-        success: true
-    })
+        let anyreq = req as any; // Needed to not receive type errors
+        const id = anyreq.params.id;
+        let article = await articleRepo.findOneBy({
+            id: "blog_article_" + id
+        });
+
+        return res.json({
+            success: true,
+            article: article
+        })
+    } catch (e) {
+        return res.json({success: false, error: e.toString(), error_obj: e})
+    }
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {

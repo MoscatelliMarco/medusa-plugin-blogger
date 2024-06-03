@@ -16,7 +16,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
             articles: await articleRepo.find()
         })
     } catch (e) {
-        return res.json({error: e.toString()})
+        return res.json({error: e.toString(), error_obj: e})
     }
 }
 

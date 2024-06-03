@@ -36,3 +36,8 @@ export const removeIdFromCurrentUrl = () => {
 }
 
 export const createPathRequest = (articleId, base_path = "/blog/articles") => articleId ? base_path + "/" + articleId : base_path
+
+export const loadArticle = (article) => {
+    // TODO Load every article key into the frontend components
+    console.log(article)
+}
