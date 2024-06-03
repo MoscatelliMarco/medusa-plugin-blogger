@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import EditorJS from "@editorjs/editorjs";
 import UploadArticleItem from "../../../ui-components/upload_article";
 import UploadImageItem from "../../../ui-components/upload_image";
@@ -34,10 +34,16 @@ const ArticleEditorPage = () => {
     });
 
     // Load article if there is an existing id
-    // TODO this now needs state to work properly
-    const loaded_article_id = getIdFromCurrentUrl();
+    const loaded_article_id = useRef(getIdFromCurrentUrl());
     const [ isArticleLoading, setIsArticleLoading ] = useState(true);
-    if (loaded_article_id) {
+
+    // NOTE
+    /*
+    Even if the rule of hooks don't allow to conditionally render them in this case it
+    is needed to not send useless requests to the server, and because loaded_article_id value
+    should not change across all the iterations
+    */
+    if (loaded_article_id.current) {
         const { data, isLoading } = useAdminCustomQuery(
             createPathRequest(loaded_article_id),
             []
@@ -57,7 +63,6 @@ const ArticleEditorPage = () => {
                     setIsIdValid(false);
                 }
             }
-
         }, [isLoading])
     } else {
         useEffect(() => {
@@ -156,7 +161,7 @@ const ArticleEditorPage = () => {
                 }
             });
             const editorContainer = document.getElementById("editorjs");
-            editorContainer.addEventListener("change", (event) => {
+            editorContainer.addEventListener("keydown", (event) => {
                 // NOTE: 
                 // there is no debounceAutoSave here because it is runned inside the onChange property of the editor
                 // because if it was runned here I would apply only to key press actions
@@ -191,7 +196,7 @@ const ArticleEditorPage = () => {
 
         // Check if the blocks of the body are empty or not
         let is_body_empty = true;
-        for (let block of articleContent.body) {
+        for (let block of articleContent.body["blocks"]) {
             if (block.type == "paragraph") {
                 if (block.data.text) {
                     is_body_empty = false;
@@ -336,10 +341,10 @@ const ArticleEditorPage = () => {
     }
 
     const getContent = async () => {
-        const body = (await editor?.save()) ? (await editor?.save())["blocks"] : [];
+        const body = (await editor?.save()) ? (await editor?.save()) : [];
         const body_images: string[] = [];
 
-        for (let block of body) {
+        for (let block of body["blocks"]) {
             if (block.type == "image") {
                 body_images.push(block.data.url)
             }

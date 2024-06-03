@@ -1,3 +1,5 @@
+import Tagify from '@yaireo/tagify';
+
 export const listenChangesSave = (debounceAutoSave) => {
     const title = document.getElementById("title");
     title.addEventListener("keyup", () => debounceAutoSave());
@@ -19,8 +21,6 @@ export const listenChangesSave = (debounceAutoSave) => {
 }
 
 export const loadArticle = (article) => {
-    // TODO Load every article key into the frontend components
-    console.log(article)
     const title = document.getElementById("title") as any;
     title.value = article.title ? article.title : "";
 
@@ -38,7 +38,10 @@ export const loadArticle = (article) => {
     const seo_description = document.getElementById("seo-description") as any;
     seo_description.value = article.seo_description ? article.seo_description : "";
 
+    // Tagify requires a different procedure to load tags
     const tags = document.getElementById("tags");
+    const tagify = new Tagify(tags);
+    tagify.addTags(article.tags);
 }
 
 export const formatDateManually = (date) => {
