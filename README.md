@@ -45,4 +45,10 @@ This endpoint accepts bodies to do a conditional search using TypeORM where para
 - When adding a `tags` key to the body, they must be an array and the database will be searched for an element that has at least all the tags inside the `tags` value in the body
 - We do not yet allow searches over the body
 
-TODO add javascript code to send and understand requests to endpoints
+TODO add javascript code example for requests
+
+## UI Guide
+
+TODO add images of all pages and explaining what they do
+
+**NOTE**: There are no mandatory fields, as your use of the fields depends on your frontend implementation
