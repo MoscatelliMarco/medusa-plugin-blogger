@@ -45,14 +45,13 @@ const ArticleEditorPage = () => {
     */
     if (loaded_article_id.current) {
         const { data, isLoading } = useAdminCustomQuery(
-            createPathRequest(loaded_article_id),
+            createPathRequest(loaded_article_id.current),
             []
         )
 
         useEffect(() => {
             if (!isLoading) {
                 setIsArticleLoading(isLoading);
-
                 if (data.article) {
                     loadArticle(data.article);
 
