@@ -1,9 +1,10 @@
 import type { 
     MedusaRequest, 
     MedusaResponse
-} from "@medusajs/medusa"
-import { BlogArticle } from "../../../../../models/blog_article"
-import { EntityManager } from "typeorm"
+} from "@medusajs/medusa";
+import { BlogArticle } from "../../../../../models/blog_article";
+import { EntityManager } from "typeorm";
+import { MySqlSanitization } from "../../../../../javascript/mysql_sanitization";
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
@@ -13,7 +14,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         let anyreq = req as any; // Needed to not receive type errors
         const id = anyreq.params.id;
         let article = await articleRepo.findOneBy({
-            id: "blog_article_" + id
+            id: "blog_article_" + MySqlSanitization(id)
         });
 
         return res.json({
@@ -33,7 +34,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         let anyreq = req as any; // Needed to not receive type errors
         const id = anyreq.params.id;
         let article = await articleRepo.findOneBy({
-            id: "blog_article_" + id
+            id: "blog_article_" + MySqlSanitization(id)
         });
 
         if (!article) {
@@ -70,7 +71,7 @@ export const DELETE = async (req: MedusaRequest, res: MedusaResponse) => {
         let anyreq = req as any; // Needed to not receive type errors
         const id = anyreq.params.id;
         let article = await articleRepo.delete({
-            id: "blog_article_" + id
+            id: "blog_article_" + MySqlSanitization(id)
         });
 
         return res.json({
