@@ -5,17 +5,18 @@ import type {
 import { BlogArticle } from "../../../../models/blog_article";
 import { EntityManager } from "typeorm";
 import { MySqlSanitizationObj } from "../../../../javascript/mysql_sanitization";
+import { convertObjToSearchQuery } from "../../../../javascript/utils";
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
         const manager: EntityManager = req.scope.resolve("manager");
         const articleRepo = manager.getRepository(BlogArticle);
         
-        const filters = MySqlSanitizationObj(req.body);
+        let filters = MySqlSanitizationObj(req.body);
+        filters = convertObjToSearchQuery(filters);
 
-        // TODO fix not searching with appropriate filters
         return res.json({
-            articles: await articleRepo.find(filters), 
+            articles: await articleRepo.find({ where: filters }), 
             sanitized_query: filters
         })
     } catch (e) {
