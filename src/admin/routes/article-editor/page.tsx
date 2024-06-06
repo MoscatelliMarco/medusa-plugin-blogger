@@ -3,8 +3,9 @@ import EditorJS from "@editorjs/editorjs";
 import UploadArticleItem from "../../../ui-components/upload_article";
 import UploadImageItem from "../../../ui-components/upload_image";
 import { Button, Container } from "@medusajs/ui";
-import { useAdminCustomQuery, useAdminCustomPost, useAdminCustomDelete } from "medusa-react";
+import { useAdminCustomQuery, useAdminCustomPost, useAdminCustomDelete, useAdminUploadFile  } from "medusa-react";
 import { listenChangesSave, getIdFromCurrentUrl, addIdFromCurrentUrl, removeIdFromCurrentUrl, createPathRequest, loadArticle, formatDateManually } from "../../../javascript/utils";
+import { createFileFromBlobURL } from "../../../javascript/file_manipulation";
 
 // Editor JS plugins
 import Paragraph from "@editorjs/paragraph";
@@ -342,17 +343,29 @@ const ArticleEditorPage = () => {
         );
     }
 
+    const uploadFile = useAdminUploadFile()
     const getContent = async () => {
         const body = (await editor?.save()) ? (await editor?.save()) : [];
         const body_images: string[] = [];
 
+        // TODO Upload all images inside the body if they are not already inside the db
         if (body["blocks"]) {
             for (let block of body["blocks"]) {
                 if (block.type == "image") {
-                    body_images.push(block.data.url)
+                    // TODO If files not already inside uploaded
+                    uploadFile.mutate(await createFileFromBlobURL(block.data.url), {
+                        onSuccess: ({ uploads }) => {  
+                            block.data.url = uploads[0].url;
+                            body_images.push(block.data.url);
+                        },
+                        onError: () => {
+                            // TODO SHOW ERROR IMAGE WILL NOT BE SAVED
+                        }
+                    })
                 }
             }
         }
+        // TODO Delete all the image changes
 
         let article = {
             author: document.getElementById("author")?.value,

@@ -62,7 +62,7 @@ const ArticlePage = () => {
                         // JSON.stringify(data)
                         (data["articles"] && data["articles"].length ? 
                         <div className="grid grid-cols-3 w-full gap-x-3 gap-y-2.5">
-                            {data["articles"].map((article) => <ArticleCard article={article}/>)}
+                            {data["articles"].map((article) => <ArticleCard article={article} key={article.id}/>)}
                         </div> :
                         <p className="max-w-sm w-full text-center mt-4 font-medium">No articles yet</p>
                         )
