@@ -39,15 +39,17 @@ const UploadArticleItem = (props) => {
                     <div className="flex justify-center">
                         {props.draftStatus ? 
                             <Button onClick={() => {
-                                props.handleSubmit();
+                                props.handleChangeDraft(false);
                                 props.setDraftStatus(false);
+                                console.log(props.draftStatus)
                             }} size="large" className="px-6 py-1.5 mb-0.5">
                                 Publish
                             </Button>
                             :
                             <Button onClick={() => {
-                                props.handleSubmit();
+                                props.handleChangeDraft(true);
                                 props.setDraftStatus(true);
+                                console.log(props.draftStatus)
                             }} size="large" className="px-6 py-1.5 mb-0.5">
                                 Become draft
                             </Button>

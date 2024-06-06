@@ -41,6 +41,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
             return res.json({success: false, error: "The ID does not match any article"})
         }
 
+        if (anyreq.body.change_draft_status) {
+            await articleRepo.save({ ...article, draft: anyreq.body.draft })
+            return res.json({
+                success: true,
+                article: { ...article, draft: anyreq.body.draft }
+            })
+        }
+
         // Keep only the existing id
         let updated_article = {id: article.id, ...anyreq.body};
 

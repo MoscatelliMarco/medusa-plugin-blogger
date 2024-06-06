@@ -310,33 +310,34 @@ const ArticleEditorPage = () => {
         }
     }
 
-    const onSubmit = async () => {
+    const handleChangeDraft = async (new_draft_status) => {
+        // if (!getIdFromCurrentUrl() || blogEmpty()) {
+        //     return setSubmitError("You cannot changed draft status if the article is empty")
+        // }
         return mutatePost(
             {
-                changed_draft_status: true, // Needed so the backend can recognize to change only the draft column
-                draft: draftStatus
+                change_draft_status: true, // Needed so the backend can recognize to change only the draft column
+                draft: new_draft_status // States are not changed instantly this prevents any "timing" errors
             },
             {
                 onSuccess: async (event) => {
+                    console.log(event)
                     if (event.error) {
-                        setSubmitError(JSON.stringify(event))
+                        setSubmitError(event.error);
+                        setSubmitSuccess("");
                     }
                     else {
-                        setSubmitSuccess("Draft status changed successfully")
+                        setSubmitError("");
+                        setSubmitSuccess("Draft status changed successfully");
                     }
                 },
                 onError: async (event) => {
-                    setSubmitError(JSON.stringify(event))
+                    console.log(event)
+                    setSubmitError(event.error);
+                    setSubmitSuccess("");
                 }
             }
         )
-    }
-
-    const handleClick = async () => {
-        if (!getIdFromCurrentUrl() || blogEmpty()) {
-            return setSubmitError("You cannot changed draft status if the article is empty")
-        }
-        onSubmit()
     }
 
     const getContent = async () => {
@@ -406,7 +407,7 @@ const ArticleEditorPage = () => {
                                     show_upload={show_upload}
                                     upload_opened={uploadOpened}
                                     inputs={inputs}
-                                    handleSubmit={handleClick}
+                                    handleChangeDraft={handleChangeDraft}
                                     submitError={submitError}
                                     submitSuccess={submitSuccess}
                                     draftStatus={draftStatus}
