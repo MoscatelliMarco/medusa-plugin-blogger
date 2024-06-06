@@ -195,18 +195,20 @@ const ArticleEditorPage = () => {
 
         // Check if the blocks of the body are empty or not
         let is_body_empty = true;
-        for (let block of articleContent.body["blocks"]) {
-            if (block.type == "paragraph") {
-                if (block.data.text) {
+        if (articleContent.body["blocks"]) {
+            for (let block of articleContent.body["blocks"]) {
+                if (block.type == "paragraph") {
+                    if (block.data.text) {
+                        is_body_empty = false;
+                    }
+                } else if (block.type == "image"){
+                    if (block.data.url && block.data.caption) {
+                        is_body_empty = false;
+                    }
+                } 
+                else {
                     is_body_empty = false;
                 }
-            } else if (block.type == "image"){
-                if (block.data.url && block.data.caption) {
-                    is_body_empty = false;
-                }
-            } 
-            else {
-                is_body_empty = false;
             }
         }
 
@@ -311,9 +313,11 @@ const ArticleEditorPage = () => {
     }
 
     const handleChangeDraft = async (new_draft_status) => {
-        // if (!getIdFromCurrentUrl() || blogEmpty()) {
-        //     return setSubmitError("You cannot changed draft status if the article is empty")
-        // }
+        if (!getIdFromCurrentUrl() || await blogEmpty()) {
+            setSubmitError("You cannot changed the draft status if the article is empty or the article is not saved");
+            setSubmitSuccess("");
+            return { error: true };
+        }
         return mutatePost(
             {
                 change_draft_status: true, // Needed so the backend can recognize to change only the draft column
@@ -321,7 +325,6 @@ const ArticleEditorPage = () => {
             },
             {
                 onSuccess: async (event) => {
-                    console.log(event)
                     if (event.error) {
                         setSubmitError(event.error);
                         setSubmitSuccess("");
@@ -332,21 +335,22 @@ const ArticleEditorPage = () => {
                     }
                 },
                 onError: async (event) => {
-                    console.log(event)
                     setSubmitError(event.error);
                     setSubmitSuccess("");
                 }
             }
-        )
+        );
     }
 
     const getContent = async () => {
         const body = (await editor?.save()) ? (await editor?.save()) : [];
         const body_images: string[] = [];
 
-        for (let block of body["blocks"]) {
-            if (block.type == "image") {
-                body_images.push(block.data.url)
+        if (body["blocks"]) {
+            for (let block of body["blocks"]) {
+                if (block.type == "image") {
+                    body_images.push(block.data.url)
+                }
             }
         }
 
