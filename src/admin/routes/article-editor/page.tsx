@@ -77,6 +77,12 @@ const ArticleEditorPage = () => {
         timeoutId = setTimeout(autoSave, 2000);
     }
 
+    // Run debounce auto save when thumbnail image change, create state for the image url of the file
+    function fileChangeHandler() {
+        debounceAutoSave();
+    }
+
+
     async function initializeEditor() {
         return new Promise((resolve, reject) => {
           const editor = new EditorJS({
@@ -233,7 +239,7 @@ const ArticleEditorPage = () => {
 
     // Create custom logic with useState the re inits everything when there is need so the path can change and be dynamic
     // https://chatgpt.com/c/9bca7fa2-850c-4438-8441-6902911ead49
-    const [articleId, setArticleId] = useState(getIdFromCurrentUrl() ? getIdFromCurrentUrl() : "");
+    const [articleId, setArticleId] = useState<string | null>(getIdFromCurrentUrl() ? getIdFromCurrentUrl() : "");
 
     // Query parameters are used for the frontend code and req parameters for the backend because it is more easy to work with urls in this way
     const customPost = useAdminCustomPost(
@@ -297,7 +303,7 @@ const ArticleEditorPage = () => {
     const autoSave = async () => {
 
         // Upload the changes
-        const articleContent = await getContent();
+        const articleContent = await getContent(true);
 
         // Check if blog is empty and if yes delete it
         const is_blog_empty = await blogEmpty();
@@ -329,6 +335,8 @@ const ArticleEditorPage = () => {
                     if (event.error) {
                         setSubmitError(event.error);
                         setSubmitSuccess("");
+
+                        // TODO delete all the uploaded images
                     }
                     else {
                         setSubmitError("");
@@ -338,13 +346,15 @@ const ArticleEditorPage = () => {
                 onError: async (event) => {
                     setSubmitError(event.error);
                     setSubmitSuccess("");
+
+                    // TODO delete all the uploaded images
                 }
             }
         );
     }
 
     const uploadFile = useAdminUploadFile()
-    const getContent = async () => {
+    const getContent = async (upload_images: boolean = false) => {
         const body = (await editor?.save()) ? (await editor?.save()) : [];
         const body_images: string[] = [];
 
@@ -352,16 +362,20 @@ const ArticleEditorPage = () => {
         if (body["blocks"]) {
             for (let block of body["blocks"]) {
                 if (block.type == "image") {
-                    // TODO If files not already inside uploaded
-                    uploadFile.mutate(await createFileFromBlobURL(block.data.url), {
-                        onSuccess: ({ uploads }) => {  
-                            block.data.url = uploads[0].url;
-                            body_images.push(block.data.url);
-                        },
-                        onError: () => {
-                            // TODO SHOW ERROR IMAGE WILL NOT BE SAVED
-                        }
-                    })
+                    if (upload_images) {
+                        // TODO If files not already inside uploaded, for this a cache body_images should be stored
+                        uploadFile.mutate(await createFileFromBlobURL(block.data.url, "blog_article_body"), {
+                            onSuccess: ({ uploads }) => {  
+                                block.data.url = uploads[0].url;
+                                body_images.push(block.data.url);
+                            },
+                            onError: () => {
+                                // TODO show error image will not be saved and that they will be removed from the upload
+                            }
+                        })
+                    } else {
+                        body_images.push(block.data.url)
+                    }
                 }
             }
         }
@@ -433,8 +447,7 @@ const ArticleEditorPage = () => {
                             </div>
 
                             <Container className="flex flex-col items-center gap-6 p-5">
-                                <UploadImageItem />
-
+                                <UploadImageItem fileChangeHandler={fileChangeHandler}/>
                                 <div className="flex flex-col gap-0.5 px-12 max-w-5xl w-full">
                                     <textarea
                                         rows={1}

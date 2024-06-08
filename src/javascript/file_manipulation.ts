@@ -1,4 +1,4 @@
-export const createFileFromBlobURL = async (blobUrl: string): Promise<File> => {
+export const createFileFromBlobURL = async (blobUrl: string, filename: string = "blog_article"): Promise<File> => {
     // Fetch the blob from the blob URL
     const response = await fetch(blobUrl);
     if (!response.ok) {
@@ -9,7 +9,7 @@ export const createFileFromBlobURL = async (blobUrl: string): Promise<File> => {
     const blob = await response.blob();
   
     // Create a File object from the blob with an empty string as the filename
-    const file = new File([blob], "blog_article.png", { type: blob.type });
+    const file = new File([blob], filename + ".png", { type: blob.type });
   
     return file;
 };

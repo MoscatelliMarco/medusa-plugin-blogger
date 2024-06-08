@@ -1,25 +1,30 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { XMark } from '@medusajs/icons';
 
-const UploadImageItem = () => {
-    const [selectedFile, setSelectedFile] = useState(null);
+const UploadImageItem = (props) => {
+    const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
     const onDrop = useCallback((acceptedFiles) => {
         // Ensure only one file is accepted
         if (acceptedFiles.length > 0) {
-            const file = acceptedFiles[0];
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                setSelectedFile(reader.result);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                alert('Please upload an image file.');
-            }
+          const file = acceptedFiles[0];
+          if (file.type.startsWith('image/')) {
+            const blobUrl = URL.createObjectURL(file);
+            setSelectedFile(blobUrl);
+          } else {
+            alert('Please upload an image file.');
+          }
         }
-    }, []);
+      }, []);
+
+      let previous_file_value = null;
+      useEffect(() => {
+        if (previous_file_value != selectedFile) {
+            props.fileChangeHandler();
+            previous_file_value = selectedFile;
+        }
+      }, [selectedFile])
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -41,7 +46,7 @@ const UploadImageItem = () => {
             </div>
             {selectedFile && (
                 <div className='overflow-hidden absolute top-0 left-0 w-full h-full bg-transparency-pattern'>
-                    <img src={selectedFile} id='thumbnail' alt="Uploaded" className='w-full h-full object-cover' />
+                    <img src={selectedFile} id='thumbnail' alt="Uploaded image" className='w-full h-full object-cover' />
                 </div>
             )}
             {selectedFile && (
