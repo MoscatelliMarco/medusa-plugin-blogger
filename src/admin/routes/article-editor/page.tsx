@@ -448,7 +448,7 @@ const ArticleEditorPage = () => {
 
                             <Container className="flex flex-col items-center gap-6 p-5">
                                 <UploadImageItem fileChangeHandler={fileChangeHandler}/>
-                                <div className="flex flex-col gap-0.5 px-12 max-w-5xl w-full">
+                                <div className="flex flex-col gap-0.5 px-6 max-w-7xl w-full">
                                     <textarea
                                         rows={1}
                                         className="auto-resize overflow-hidden resize-none h-auto font-semibold text-4xl text-gray-700 bg-transparent focus:outline-none auto-height-input"

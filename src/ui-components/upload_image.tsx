@@ -35,7 +35,7 @@ const UploadImageItem = (props) => {
     });
 
     return (
-        <div className='relative h-[32rem] border border-dashed border-gray-400 text-gray-400 rounded-md max-w-5xl w-full'>
+        <div className='relative h-[32rem] border border-dashed border-gray-400 text-gray-400 rounded-md max-w-7xl w-full'>
             <div {...getRootProps()} className='w-full flex justify-center items-center h-full'>
                 <input {...getInputProps()} />
                 {isDragActive ? (
