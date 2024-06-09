@@ -544,7 +544,7 @@ const ArticleEditorPage = () => {
                         <div className="flex flex-col gap-5">
                             <div className="flex flex-col">
                                 <div className="flex justify-between items-center text-xs">
-                                    <p className={`${statusSavedError ? "text-red-300" : "text-gray-400"} text-sm`}>{statusSaved}</p>
+                                    <p className={`${statusSavedError ? "text-red-400" : "text-gray-400"} text-sm`}>{statusSaved}</p>
                                     <Button
                                         className="px-5 py-1.5"
                                         variant="secondary"
