@@ -525,7 +525,7 @@ const ArticleEditorPage = () => {
 
         // Delete key if it is not mandatory and it does not exists
         for (let key of Object.keys(article)) {
-            if (!["title", "body", "draft"].includes(key)) {
+            if (!["title", "draft"].includes(key)) {
                 if (!article[key] || (Array.isArray(article[key]) && !article[key].length)) {
                     delete article[key]
                 }
