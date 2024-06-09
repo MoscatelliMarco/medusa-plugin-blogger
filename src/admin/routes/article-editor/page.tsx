@@ -398,6 +398,7 @@ const ArticleEditorPage = () => {
     const [selectedFile, setSelectedFile] = useState<string | null>(null); // For thumbnail image
     const getContent = async (upload_images: boolean = false) => {
         let body = (await editor?.save()) ? (await editor?.save()) : null;
+        console.log(body)
         if (body && !body["blocks"].length) {
             body = null; // If there is no body blocks delete it
         }
@@ -420,14 +421,32 @@ const ArticleEditorPage = () => {
                         if (block.data.url.includes("blob:")) {
                             const uploadPromise = new Promise(async (resolve, reject) => {
                                 uploadFile.mutate(await createFileFromBlobURL(block.data.url, "blog_article_body"), {
-                                    onSuccess: ({ uploads }) => { 
+                                    onSuccess: ({ uploads }) => {
                                         block.data.url = uploads[0].url;
                                         body_images.push(block.data.url);
+
+                                        // Select the element using the data-id
+                                        const element = document.querySelector(`.ce-block[data-id="${block.id}"]`);
+                                        // Check if the element exists
+                                        if (element) {
+                                            // Find the img element within the selected element
+                                            const imgElement = element.querySelector('.cdx-simple-image__picture img');
+                                            // Check if the img element exists
+                                            if (imgElement) {
+                                                // Change the src attribute of the img element
+                                                imgElement.src = block.data.url;
+                                            } else {
+                                                reject();
+                                            }
+                                        } else {
+                                            reject();
+                                        }
+
                                         resolve(undefined);
                                     },
-                                    onError: () => {
+                                    onError: (event) => {
                                         // TODO show error image will not be saved and that they will be removed from the upload
-    
+                                        console.log(event);
                                         reject();
                                     }
                                 })
@@ -450,9 +469,9 @@ const ArticleEditorPage = () => {
                         setSelectedFile(thumbnail_image_url);
                         resolve(undefined);
                     },
-                    onError: () => {
+                    onError: (event) => {
                         // TODO show error image will not be saved and that they will be removed from the upload
-                    
+                        console.log(event);
                         reject();
                     }
                 })
@@ -466,7 +485,22 @@ const ArticleEditorPage = () => {
             await Promise.all(uploadPromises);
         } catch (error) {
             console.error("One or more image uploads/deletion failed:", error);
+            return { error: "One or more image uploads/deletion failed"};
+        }
 
+        // TODO If there is at least on rejected promises delete all files that were added from the DB
+         // Wait for all upload promises to settle
+        const results = await Promise.allSettled(uploadPromises);
+        let is_one_rejected = false;
+        // Check for any rejected promises
+        for (const result of results) {
+            if (result.status === "rejected") {
+                is_one_rejected = true;
+                break;
+            }
+        }
+        if (is_one_rejected) {
+            // TODO delete added files
             return { error: "One or more image uploads/deletion failed"};
         }
 
@@ -535,7 +569,7 @@ const ArticleEditorPage = () => {
                                 />
                             </div>
 
-                            <Container className="flex flex-col items-center gap-6 p-5">
+                            <Container className="flex flex-col items-center gap-6 p-5 mb-12">
                                 <UploadImageItem 
                                 fileChangeHandler={fileChangeHandler} 
                                 loadedThumbnailImage={loadedThumbnailImage}
@@ -583,10 +617,14 @@ const ArticleEditorPage = () => {
                                         stroke: rgb(55 65 81);
                                     }
                                     .ce-toolbar__settings-btn {
-                                        margin-left: -0.375rem;
+                                        margin-left: -0.125rem;
                                     }
                                     .ce-toolbar__actions {
                                         margin-right: -0.0625rem;
+                                    }
+                                    .codex-editor__redactor {
+                                        padding-bottom: 13rem !important; 
+                                        min-height: 16rem;
                                     }
                                     h1 {
                                         font-size: 2rem;
