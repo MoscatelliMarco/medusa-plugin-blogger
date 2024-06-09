@@ -164,7 +164,9 @@ const ArticleEditorPage = () => {
 
             setupEditor().then(() => {
                 // Load already existing body if there is one
-                editor.render(loadedBody);
+                if (loadedBody) {
+                    editor.render(loadedBody);
+                }
 
                 // Add listeners to every input for autoSave
                 listenChangesSave(debounceAutoSave); 
