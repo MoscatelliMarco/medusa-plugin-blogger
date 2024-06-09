@@ -3,7 +3,7 @@ import EditorJS from "@editorjs/editorjs";
 import UploadArticleItem from "../../../ui-components/upload_article";
 import UploadImageItem from "../../../ui-components/upload_image";
 import { Button, Container } from "@medusajs/ui";
-import { useAdminCustomQuery, useAdminCustomPost, useAdminCustomDelete, useAdminUploadFile  } from "medusa-react";
+import { useAdminCustomQuery, useAdminCustomPost, useAdminCustomDelete, useAdminUploadFile, useAdminDeleteFile  } from "medusa-react";
 import { listenChangesSave, getIdFromCurrentUrl, addIdFromCurrentUrl, removeIdFromCurrentUrl, createPathRequest, loadArticle, formatDateManually, mergeUniqueArrays } from "../../../javascript/utils";
 import { createFileFromBlobURL } from "../../../javascript/file_manipulation";
 
@@ -395,10 +395,10 @@ const ArticleEditorPage = () => {
     }
 
     const uploadFile = useAdminUploadFile();
+    const deleteFile = useAdminDeleteFile();
     const [selectedFile, setSelectedFile] = useState<string | null>(null); // For thumbnail image
     const getContent = async (upload_images: boolean = false) => {
         let body = (await editor?.save()) ? (await editor?.save()) : null;
-        console.log(body)
         if (body && !body["blocks"].length) {
             body = null; // If there is no body blocks delete it
         }
@@ -406,6 +406,9 @@ const ArticleEditorPage = () => {
 
         // Create an array to hold all the Promises
         const uploadPromises = [];
+
+        // Hold all the upload images, in case there is an error it is more easy to delete them
+        const uploadedImages: string[] = [];
 
         // TODO Upload all images inside the body if they are not already inside the db
         if (body && body["blocks"]) {
@@ -424,6 +427,7 @@ const ArticleEditorPage = () => {
                                     onSuccess: ({ uploads }) => {
                                         block.data.url = uploads[0].url;
                                         body_images.push(block.data.url);
+                                        uploadedImages.push(block.data.url);
 
                                         // Select the element using the data-id
                                         const element = document.querySelector(`.ce-block[data-id="${block.id}"]`);
@@ -464,6 +468,7 @@ const ArticleEditorPage = () => {
                 uploadFile.mutate(await createFileFromBlobURL(thumbnail_image_url, "blog_article_thumbnail"), {
                     onSuccess: ({ uploads }) => {
                         thumbnail_image_url = uploads[0].url;
+                        uploadedImages.push(thumbnail_image_url);
                         setSelectedFile(thumbnail_image_url);
                         resolve(undefined);
                     },
@@ -480,10 +485,26 @@ const ArticleEditorPage = () => {
         try {
             await Promise.all(uploadPromises);
         } catch (error) {
-            // TODO If there is at least on rejected promises delete all files that were added from the DB
-
+            /*
+            If there is at least on rejected promises delete all files that 
+            were added from the DB
+            */
+            for (let image of uploadedImages) {
+                const file_key = image.split('/').slice(-1)[0];
+                deleteFile.mutate({
+                    file_key: file_key
+                })
+            }
             return { error: "One or more image uploads/deletion failed"};
         }
+
+        /*
+        If the first part of the managing file process works that means that elements can be 
+        deleted without any error. And even if there will be any image without a body or thumbnail
+        this issue can be easily addressed with a cron job
+        */
+
+        setImagesCache(uploadedImages);
 
         let article = {
             author: document.getElementById("author")?.value,
