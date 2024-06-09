@@ -104,3 +104,9 @@ export const convertObjToSearchQuery = (obj) => {
     }
     return result;
 }
+
+export const mergeUniqueArrays = <T>(array1: T[], array2: T[]): T[] => {
+    const combinedArray = [...array1, ...array2];
+    const uniqueArray = Array.from(new Set(combinedArray));
+    return uniqueArray;
+  };

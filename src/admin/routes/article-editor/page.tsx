@@ -4,7 +4,7 @@ import UploadArticleItem from "../../../ui-components/upload_article";
 import UploadImageItem from "../../../ui-components/upload_image";
 import { Button, Container } from "@medusajs/ui";
 import { useAdminCustomQuery, useAdminCustomPost, useAdminCustomDelete, useAdminUploadFile  } from "medusa-react";
-import { listenChangesSave, getIdFromCurrentUrl, addIdFromCurrentUrl, removeIdFromCurrentUrl, createPathRequest, loadArticle, formatDateManually } from "../../../javascript/utils";
+import { listenChangesSave, getIdFromCurrentUrl, addIdFromCurrentUrl, removeIdFromCurrentUrl, createPathRequest, loadArticle, formatDateManually, mergeUniqueArrays } from "../../../javascript/utils";
 import { createFileFromBlobURL } from "../../../javascript/file_manipulation";
 
 // Editor JS plugins
@@ -38,6 +38,12 @@ const ArticleEditorPage = () => {
     const loaded_article_id = useRef(getIdFromCurrentUrl());
     const [ isArticleLoading, setIsArticleLoading ] = useState(true);
 
+    // Images need to be stored in a variable right after the body loads
+    const [ imagesCache, setImagesCache ] = useState<string[]>([])
+
+    // Store body to load
+    const [ loadedBody, setLoadedBody ] = useState(null);
+
     // NOTE
     /*
     Even if the rule of hooks don't allow to conditionally render them in this case it
@@ -52,9 +58,15 @@ const ArticleEditorPage = () => {
 
         useEffect(() => {
             if (!isLoading) {
-                setIsArticleLoading(isLoading);
                 if (data.article) {
                     loadArticle(data.article);
+                    setLoadedBody(data.article.body);
+
+                    // Save already existing images inside a state
+                    // let article_images = data.article.thumbnail_images ?
+                    // mergeUniqueArrays([data.article.thumbnail_images], data.article.body_images) :
+                    // data.article.body_images;
+                    // setImagesCache(prec_state => mergeUniqueArrays(prec_state, article_images));
 
                     // Save time article loaded
                     const dateSaved = new Date();
@@ -62,6 +74,13 @@ const ArticleEditorPage = () => {
                 } else {
                     setIsIdValid(false);
                 }
+
+                /*
+                NOTE: 
+                this needs to be runned at the end because in react state are scheduled if there
+                is a loaded body, I want to change that state before the loading state
+                */
+                setIsArticleLoading(isLoading);
             }
         }, [isLoading])
     } else {
@@ -126,76 +145,79 @@ const ArticleEditorPage = () => {
             }
           });
         });
-      }
+    }
 
-      let editor;
-      async function setupEditor() {
+    let editor;
+    async function setupEditor() {
         try {
-          editor = await initializeEditor();
-          console.log('Editor is ready');
+            editor = await initializeEditor();
+            console.log('Editor is ready');
         } catch (error) {
-          console.error('Error initializing editor:', error);
+            console.error('Error initializing editor:', error);
         }
-      }
+    }
 
     // With MedusaJS the component is initialized two times, this is here to prevent creating multiple editors for nothing
     let runned = false;
     useEffect(() => {
-        if (!runned) {
+        if (!runned && !isArticleLoading) {
 
-            setupEditor();
+            setupEditor().then(() => {
+                // Load already existing body if there is one
+                editor.render(loadedBody);
 
-            // Add listeners to every input for autoSave
-            listenChangesSave(debounceAutoSave); 
+                // Add listeners to every input for autoSave
+                listenChangesSave(debounceAutoSave); 
 
-            const title = document.getElementById("title");
-            title.addEventListener("keydown", (event) => {
-                if (event.key == "Enter" || event.key == "ArrowDown") {
-                    event.preventDefault();
-                    document.getElementById("subtitle").focus();
-                }
-            });
-            const subtitle = document.getElementById("subtitle") as any;
-            subtitle.addEventListener("keydown", (event) => {
-                if (event.key == "Enter" || event.key == "ArrowDown") {
-                    event.preventDefault();
-                    editor.focus();
-                } else if (event.key == "Backspace" || event.key == "ArrowUp") {
-                    if (!subtitle.value) {
-                        document.getElementById("title").focus();
+                const title = document.getElementById("title");
+                title.addEventListener("keydown", (event) => {
+                    if (event.key == "Enter" || event.key == "ArrowDown") {
+                        event.preventDefault();
+                        document.getElementById("subtitle").focus();
                     }
-                }
-            });
-            const editorContainer = document.getElementById("editorjs");
-            editorContainer.addEventListener("keydown", (event) => {
-                // NOTE: 
-                // there is no debounceAutoSave here because it is runned inside the onChange property of the editor
-                // because if it was runned here I would apply only to key press actions
-                if (event.key === "Backspace" || event.key == "ArrowUp") {
-                    const editorBlocks = editor.blocks.getBlocksCount();
-                    if (editorBlocks === 1) {
-                        const firstBlock = editor.blocks.getBlockByIndex(0);
-                        if (firstBlock.isEmpty) {
-                            document.getElementById("subtitle").focus();
+                });
+                const subtitle = document.getElementById("subtitle") as any;
+                subtitle.addEventListener("keydown", (event) => {
+                    if (event.key == "Enter" || event.key == "ArrowDown") {
+                        event.preventDefault();
+                        editor.focus();
+                    } else if (event.key == "Backspace" || event.key == "ArrowUp") {
+                        if (!subtitle.value) {
+                            document.getElementById("title").focus();
                         }
                     }
+                });
+                const editorContainer = document.getElementById("editorjs");
+                editorContainer.addEventListener("keydown", (event) => {
+                    // NOTE: 
+                    // there is no debounceAutoSave here because it is runned inside the onChange property of the editor
+                    // because if it was runned here I would apply only to key press actions
+                    if (event.key === "Backspace" || event.key == "ArrowUp") {
+                        const editorBlocks = editor.blocks.getBlocksCount();
+                        if (editorBlocks === 1) {
+                            const firstBlock = editor.blocks.getBlockByIndex(0);
+                            if (firstBlock.isEmpty) {
+                                document.getElementById("subtitle").focus();
+                            }
+                        }
+                    }
+                });
+
+                // Resize textarea so they are like inputs but with breakline
+                const autoResizeInputs = document.querySelectorAll(".auto-resize");
+                for (let input of autoResizeInputs) {
+                    input.addEventListener("input", autoResize, false);
+
+                    function autoResize() {
+                        this.style.height = "auto";
+                        this.style.height = this.scrollHeight + "px";
+                    }
                 }
+
+                runned = true;
             });
-
-            // Resize textarea so they are like inputs but with breakline
-            const autoResizeInputs = document.querySelectorAll(".auto-resize");
-            for (let input of autoResizeInputs) {
-                input.addEventListener("input", autoResize, false);
-
-                function autoResize() {
-                    this.style.height = "auto";
-                    this.style.height = this.scrollHeight + "px";
-                }
-            }
-
-            runned = true;
         }
-    }, []);
+    }, [isArticleLoading]);
 
     async function blogEmpty() {
         const articleContent = await getContent();
@@ -325,6 +347,7 @@ const ArticleEditorPage = () => {
             setSubmitSuccess("");
             return { error: true };
         }
+
         return mutatePost(
             {
                 change_draft_status: true, // Needed so the backend can recognize to change only the draft column
@@ -335,8 +358,6 @@ const ArticleEditorPage = () => {
                     if (event.error) {
                         setSubmitError(event.error);
                         setSubmitSuccess("");
-
-                        // TODO delete all the uploaded images
                     }
                     else {
                         setSubmitError("");
@@ -346,8 +367,6 @@ const ArticleEditorPage = () => {
                 onError: async (event) => {
                     setSubmitError(event.error);
                     setSubmitSuccess("");
-
-                    // TODO delete all the uploaded images
                 }
             }
         );
@@ -364,6 +383,13 @@ const ArticleEditorPage = () => {
                 if (block.type == "image") {
                     if (upload_images) {
                         // TODO If files not already inside uploaded, for this a cache body_images should be stored
+                        /* 
+                        STEPS
+                        1. check for new values, to do so look and the urls that have blob: inside
+                        2. upload the new images, if it succeed cache the new images, if it fails show an error
+                        */
+
+
                         uploadFile.mutate(await createFileFromBlobURL(block.data.url, "blog_article_body"), {
                             onSuccess: ({ uploads }) => {  
                                 block.data.url = uploads[0].url;
@@ -448,7 +474,7 @@ const ArticleEditorPage = () => {
 
                             <Container className="flex flex-col items-center gap-6 p-5">
                                 <UploadImageItem fileChangeHandler={fileChangeHandler}/>
-                                <div className="flex flex-col gap-0.5 px-6 max-w-7xl w-full">
+                                <div className="flex flex-col gap-0.5 px-11 max-w-7xl w-full">
                                     <textarea
                                         rows={1}
                                         className="auto-resize overflow-hidden resize-none h-auto font-semibold text-4xl text-gray-700 bg-transparent focus:outline-none auto-height-input"
@@ -487,6 +513,12 @@ const ArticleEditorPage = () => {
                                     }
                                     .ce-toolbar__plus svg path {
                                         stroke: rgb(55 65 81);
+                                    }
+                                    .ce-toolbar__plus {
+                                        margin-right: -0.6rem;
+                                    }
+                                    .ce-toolbar__actions {
+                                        margin-right: -0.0625rem;
                                     }
                                     h1 {
                                         font-size: 2rem;
