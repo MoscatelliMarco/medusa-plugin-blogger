@@ -27,8 +27,9 @@ const ArticleEditorPage = () => {
     const [submitError, setSubmitError] = useState("");
     const [submitSuccess, setSubmitSuccess] = useState("");
     const [statusSaved, setStatusSaved] = useState("Not saved");
+    const [statusSavedError, setStatusSavedError] = useState(false);
     const [draftStatus, setDraftStatus] = useState(true);
-    const [ isIdValid, setIsIdValid ] = useState(true);
+    const [isIdValid, setIsIdValid] = useState(true);
     const [inputs, setInputs] = useState({
         title: "",
         subtitle: "",
@@ -43,6 +44,9 @@ const ArticleEditorPage = () => {
 
     // Store body to load
     const [ loadedBody, setLoadedBody ] = useState(null);
+
+    // Store thumbnail image to load
+    const [ loadedThumbnailImage, setLoadedThumbnailImage ] = useState<string | null>(null);
 
     // NOTE
     /*
@@ -61,16 +65,25 @@ const ArticleEditorPage = () => {
                 if (data.article) {
                     loadArticle(data.article);
                     setLoadedBody(data.article.body);
+                    setLoadedThumbnailImage(data.article.thumbnail_image);
 
                     // Save already existing images inside a state
-                    // let article_images = data.article.thumbnail_images ?
-                    // mergeUniqueArrays([data.article.thumbnail_images], data.article.body_images) :
-                    // data.article.body_images;
-                    // setImagesCache(prec_state => mergeUniqueArrays(prec_state, article_images));
+                    let article_images = data.article.thumbnail_image && data.article.body_images ?
+                    mergeUniqueArrays([data.article.thumbnail_image], data.article.body_images) :
+                    (data.article.body_images ? 
+                        data.article.body_images :
+                        (
+                            data.article.thumbnail_image ?
+                            [data.article.thumbnail_image]:
+                            []
+                        )
+                    );
+                    setImagesCache(prec_state => mergeUniqueArrays(prec_state, article_images));
 
                     // Save time article loaded
                     const dateSaved = new Date();
-                    setStatusSaved(`Loaded at ${formatDateManually(dateSaved)}`)
+                    setStatusSaved(`Loaded at ${formatDateManually(dateSaved)}`);
+                    setStatusSavedError(false);
                 } else {
                     setIsIdValid(false);
                 }
@@ -160,7 +173,7 @@ const ArticleEditorPage = () => {
     // With MedusaJS the component is initialized two times, this is here to prevent creating multiple editors for nothing
     let runned = false;
     useEffect(() => {
-        if (!runned && !isArticleLoading) {
+        if (!runned && !isArticleLoading && isIdValid) {
 
             setupEditor().then(() => {
                 // Load already existing body if there is one
@@ -226,7 +239,7 @@ const ArticleEditorPage = () => {
 
         // Check if the blocks of the body are empty or not
         let is_body_empty = true;
-        if (articleContent.body["blocks"]) {
+        if (articleContent.body && articleContent.body["blocks"]) {
             for (let block of articleContent.body["blocks"]) {
                 if (block.type == "paragraph") {
                     if (block.data.text) {
@@ -282,7 +295,8 @@ const ArticleEditorPage = () => {
 
         // Show error if there is
         if (!response.success) {
-            return setStatusSaved(`Unable to save, server error: ${response.error}`)
+            setStatusSaved(`Unable to save, server error: ${response.error}`);
+            return setStatusSavedError(true);
         }
 
         // If page is blank that means that the article is deleted, show a message
@@ -322,12 +336,18 @@ const ArticleEditorPage = () => {
     }
     const errorAutoSave = () => {
         setStatusSaved("Unable to save, try again later");
+        setStatusSavedError(true);
     }
 
     const autoSave = async () => {
 
         // Upload the changes
         const articleContent = await getContent(true);
+
+        if (articleContent.error) {
+            setStatusSaved(articleContent.error);
+            return setStatusSavedError(true);
+        }
 
         // Check if blog is empty and if yes delete it
         const is_blog_empty = await blogEmpty();
@@ -374,40 +394,81 @@ const ArticleEditorPage = () => {
         );
     }
 
-    const uploadFile = useAdminUploadFile()
+    const uploadFile = useAdminUploadFile();
+    const [selectedFile, setSelectedFile] = useState<string | null>(null); // For thumbnail image
     const getContent = async (upload_images: boolean = false) => {
-        const body = (await editor?.save()) ? (await editor?.save()) : [];
+        let body = (await editor?.save()) ? (await editor?.save()) : null;
+        if (body && !body["blocks"].length) {
+            body = null; // If there is no body blocks delete it
+        }
         const body_images: string[] = [];
 
+        // Create an array to hold all the Promises
+        const uploadPromises = [];
+
         // TODO Upload all images inside the body if they are not already inside the db
-        if (body["blocks"]) {
+        if (body && body["blocks"]) {
             for (let block of body["blocks"]) {
                 if (block.type == "image") {
                     if (upload_images) {
-                        // TODO If files not already inside uploaded, for this a cache body_images should be stored
                         /* 
                         STEPS
                         1. check for new values, to do so look and the urls that have blob: inside
                         2. upload the new images, if it succeed cache the new images, if it fails show an error
                         */
 
-
-                        uploadFile.mutate(await createFileFromBlobURL(block.data.url, "blog_article_body"), {
-                            onSuccess: ({ uploads }) => {  
-                                block.data.url = uploads[0].url;
-                                body_images.push(block.data.url);
-                            },
-                            onError: () => {
-                                // TODO show error image will not be saved and that they will be removed from the upload
-                            }
-                        })
+                        if (block.data.url.includes("blob:")) {
+                            const uploadPromise = new Promise(async (resolve, reject) => {
+                                uploadFile.mutate(await createFileFromBlobURL(block.data.url, "blog_article_body"), {
+                                    onSuccess: ({ uploads }) => { 
+                                        block.data.url = uploads[0].url;
+                                        body_images.push(block.data.url);
+                                        resolve(undefined);
+                                    },
+                                    onError: () => {
+                                        // TODO show error image will not be saved and that they will be removed from the upload
+    
+                                        reject();
+                                    }
+                                })
+                            })
+                            uploadPromises.push(uploadPromise);
+                        }
                     } else {
                         body_images.push(block.data.url)
                     }
                 }
             }
         }
+        // Upload thumbnail image
+        let thumbnail_image_url = document.getElementById("thumbnail") ? document.getElementById("thumbnail").src : null;
+        if (thumbnail_image_url && upload_images && thumbnail_image_url.includes("blob:")) {
+            const uploadPromise = new Promise(async (resolve, reject) => {
+                uploadFile.mutate(await createFileFromBlobURL(thumbnail_image_url, "blog_article_thumbnail"), {
+                    onSuccess: ({ uploads }) => {
+                        thumbnail_image_url = uploads[0].url;
+                        setSelectedFile(thumbnail_image_url);
+                        resolve(undefined);
+                    },
+                    onError: () => {
+                        // TODO show error image will not be saved and that they will be removed from the upload
+                    
+                        reject();
+                    }
+                })
+            })
+            uploadPromises.push(uploadPromise);
+        }
         // TODO Delete all the image changes
+
+        // Wait for all upload promises to resolve
+        try {
+            await Promise.all(uploadPromises);
+        } catch (error) {
+            console.error("One or more image uploads/deletion failed:", error);
+
+            return { error: "One or more image uploads/deletion failed"};
+        }
 
         let article = {
             author: document.getElementById("author")?.value,
@@ -417,7 +478,7 @@ const ArticleEditorPage = () => {
             url_slug: document.getElementById("url-slug")?.value,
             seo_description: document.getElementById("seo-description")?.value,
 
-            thumbnail_image: document.getElementById("thumbnail") ? document.getElementById("thumbnail").src : "",
+            thumbnail_image: thumbnail_image_url,
             title: document.getElementById("title")?.value,
             subtitle: document.getElementById("subtitle")?.value,
             body: body,
@@ -449,7 +510,7 @@ const ArticleEditorPage = () => {
                         <div className="flex flex-col gap-5">
                             <div className="flex flex-col">
                                 <div className="flex justify-between items-center text-xs">
-                                    <p className="text-gray-400 text-sm">{statusSaved}</p>
+                                    <p className={`${statusSavedError ? "text-red-300" : "text-gray-400"} text-sm`}>{statusSaved}</p>
                                     <Button
                                         className="px-5 py-1.5"
                                         variant="secondary"
@@ -475,7 +536,12 @@ const ArticleEditorPage = () => {
                             </div>
 
                             <Container className="flex flex-col items-center gap-6 p-5">
-                                <UploadImageItem fileChangeHandler={fileChangeHandler}/>
+                                <UploadImageItem 
+                                fileChangeHandler={fileChangeHandler} 
+                                loadedThumbnailImage={loadedThumbnailImage}
+                                selectedFile={selectedFile}
+                                setSelectedFile={setSelectedFile}
+                                />
                                 <div className="flex flex-col gap-0.5 px-11 max-w-7xl w-full">
                                     <textarea
                                         rows={1}
@@ -516,8 +582,8 @@ const ArticleEditorPage = () => {
                                     .ce-toolbar__plus svg path {
                                         stroke: rgb(55 65 81);
                                     }
-                                    .ce-toolbar__plus {
-                                        margin-right: -0.6rem;
+                                    .ce-toolbar__settings-btn {
+                                        margin-left: -0.375rem;
                                     }
                                     .ce-toolbar__actions {
                                         margin-right: -0.0625rem;

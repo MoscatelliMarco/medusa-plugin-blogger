@@ -3,7 +3,16 @@ import { useDropzone } from 'react-dropzone';
 import { XMark } from '@medusajs/icons';
 
 const UploadImageItem = (props) => {
-    const [selectedFile, setSelectedFile] = useState<string | null>(null);
+    const [imageUploadError, setImageUploadError] = useState<boolean>(false);
+
+    useEffect(() => {
+        props.setSelectedFile(props.loadedThumbnailImage);
+    }, [props.loadedThumbnailImage]);
+
+    const handleImageError = () => {
+        props.setSelectedFile(previous_file => previous_file.replace("blob:", ""));
+        setImageUploadError(true);
+    }
 
     const onDrop = useCallback((acceptedFiles) => {
         // Ensure only one file is accepted
@@ -11,20 +20,14 @@ const UploadImageItem = (props) => {
           const file = acceptedFiles[0];
           if (file.type.startsWith('image/')) {
             const blobUrl = URL.createObjectURL(file);
-            setSelectedFile(blobUrl);
+            props.setSelectedFile(blobUrl);
+            setImageUploadError(false);
+            props.fileChangeHandler();
           } else {
             alert('Please upload an image file.');
           }
         }
       }, []);
-
-      let previous_file_value = null;
-      useEffect(() => {
-        if (previous_file_value != selectedFile) {
-            props.fileChangeHandler();
-            previous_file_value = selectedFile;
-        }
-      }, [selectedFile])
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -44,14 +47,26 @@ const UploadImageItem = (props) => {
                     <p>Drag and drop the thumbnail image here, or click to select the file</p>
                 )}
             </div>
-            {selectedFile && (
+            {props.selectedFile && (
                 <div className='overflow-hidden absolute top-0 left-0 w-full h-full bg-transparency-pattern'>
-                    <img src={selectedFile} id='thumbnail' alt="Uploaded image" className='w-full h-full object-cover' />
+                    {
+                        imageUploadError ? 
+                        <div className='w-full h-full grid place-items-center'>
+                            <p className='text-center max-w-md text-red-500 p-1.5 font-medium bg-black'>
+                                The loaded thumbnail image does not exist in the database, delete this image by clicking in the top left button before adding a new image
+                            </p>
+                        </div> : 
+                        ""
+                    }
+                    <img onError={handleImageError} src={props.selectedFile} id='thumbnail' alt="" className='w-full h-full object-cover' />
                 </div>
             )}
-            {selectedFile && (
+            {props.selectedFile && (
                 <div className='absolute top-2.5 left-2.5 flex justify-center'>
-                    <button onClick={() => setSelectedFile(null)} className='p-1.5 bg-red-600 bg-opacity-50 text-white font-medium rounded-xl'>
+                    <button onClick={() => {
+                        props.setSelectedFile(null);
+                        props.fileChangeHandler();
+                        }} className='p-1.5 bg-red-600 bg-opacity-50 text-white font-medium rounded-xl'>
                         <XMark />
                     </button>
                 </div>

@@ -39,7 +39,7 @@ export class BlogArticle extends BaseEntity {
     @Column({ nullable: true })
     subtitle: string;
 
-    @Column('json', { nullable: false, array: false })
+    @Column('json', { nullable: true, array: false })
     body: any; // Assuming body will be a complex JSON structure
 
     @Column("text", { array: true, nullable: true})

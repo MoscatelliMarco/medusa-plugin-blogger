@@ -16,7 +16,7 @@ export class CreateBlogPostTable1713183081316 implements MigrationInterface {
                 { name: "thumbnail_image", type: "varchar", isNullable: true },
                 { name: "title", type: "varchar" },
                 { name: "subtitle", type: "varchar", isNullable: true },
-                { name: "body", type: "jsonb" },
+                { name: "body", type: "jsonb", isNullable: true },
                 { name: "body_images", type: "jsonb", isNullable: true},
                 { name: "draft", type: "boolean" },
                 { name: 'created_at', type: 'TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()'},
