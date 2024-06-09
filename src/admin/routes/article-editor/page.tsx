@@ -444,9 +444,7 @@ const ArticleEditorPage = () => {
 
                                         resolve(undefined);
                                     },
-                                    onError: (event) => {
-                                        // TODO show error image will not be saved and that they will be removed from the upload
-                                        console.log(event);
+                                    onError: () => {
                                         reject();
                                     }
                                 })
@@ -469,9 +467,7 @@ const ArticleEditorPage = () => {
                         setSelectedFile(thumbnail_image_url);
                         resolve(undefined);
                     },
-                    onError: (event) => {
-                        // TODO show error image will not be saved and that they will be removed from the upload
-                        console.log(event);
+                    onError: () => {
                         reject();
                     }
                 })
@@ -484,23 +480,8 @@ const ArticleEditorPage = () => {
         try {
             await Promise.all(uploadPromises);
         } catch (error) {
-            console.error("One or more image uploads/deletion failed:", error);
-            return { error: "One or more image uploads/deletion failed"};
-        }
+            // TODO If there is at least on rejected promises delete all files that were added from the DB
 
-        // TODO If there is at least on rejected promises delete all files that were added from the DB
-         // Wait for all upload promises to settle
-        const results = await Promise.allSettled(uploadPromises);
-        let is_one_rejected = false;
-        // Check for any rejected promises
-        for (const result of results) {
-            if (result.status === "rejected") {
-                is_one_rejected = true;
-                break;
-            }
-        }
-        if (is_one_rejected) {
-            // TODO delete added files
             return { error: "One or more image uploads/deletion failed"};
         }
 
