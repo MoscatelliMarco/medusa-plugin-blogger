@@ -40,7 +40,7 @@ const ArticleEditorPage = () => {
     const [ isArticleLoading, setIsArticleLoading ] = useState(true);
 
     // Images need to be stored in a variable right after the body loads
-    const [ imagesCache, setImagesCache ] = useState<string[]>([])
+    const imagesCache = useRef([]);
 
     // Store body to load
     const [ loadedBody, setLoadedBody ] = useState(null);
@@ -68,17 +68,17 @@ const ArticleEditorPage = () => {
                     setLoadedThumbnailImage(data.article.thumbnail_image);
 
                     // Save already existing images inside a state
-                    let article_images = data.article.thumbnail_image && data.article.body_images ?
-                    mergeUniqueArrays([data.article.thumbnail_image], data.article.body_images) :
-                    (data.article.body_images ? 
-                        data.article.body_images :
-                        (
-                            data.article.thumbnail_image ?
-                            [data.article.thumbnail_image]:
-                            []
-                        )
-                    );
-                    setImagesCache(prec_state => mergeUniqueArrays(prec_state, article_images));
+                    let article_images;
+                    if (data.article.body_images && data.article.thumbnail_image) {
+                        article_images = mergeUniqueArrays(data.article.body_images, [data.article.thumbnail_image])
+                    } else if (data.article.body_images) {
+                        article_images = data.article.body_images;
+                    } else if (data.article.thumbnail_image) {
+                        article_images = [data.article.thumbnail_image];
+                    } else {
+                        article_images = [];
+                    }
+                    imagesCache.current = mergeUniqueArrays(imagesCache.current, article_images);
 
                     // Save time article loaded
                     const dateSaved = new Date();
@@ -160,10 +160,10 @@ const ArticleEditorPage = () => {
         });
     }
 
-    let editor;
+    let editor = useRef(null);
     async function setupEditor() {
         try {
-            editor = await initializeEditor();
+            editor.current = await initializeEditor();
             console.log('Editor is ready');
         } catch (error) {
             console.error('Error initializing editor:', error);
@@ -178,7 +178,7 @@ const ArticleEditorPage = () => {
             setupEditor().then(() => {
                 // Load already existing body if there is one
                 if (loadedBody) {
-                    editor.render(loadedBody);
+                    editor.current.render(loadedBody);
                 }
 
                 // Add listeners to every input for autoSave
@@ -195,7 +195,7 @@ const ArticleEditorPage = () => {
                 subtitle.addEventListener("keydown", (event) => {
                     if (event.key == "Enter" || event.key == "ArrowDown") {
                         event.preventDefault();
-                        editor.focus();
+                        editor.current.focus();
                     } else if (event.key == "Backspace" || event.key == "ArrowUp") {
                         if (!subtitle.value) {
                             document.getElementById("title").focus();
@@ -208,9 +208,9 @@ const ArticleEditorPage = () => {
                     // there is no debounceAutoSave here because it is runned inside the onChange property of the editor
                     // because if it was runned here I would apply only to key press actions
                     if (event.key === "Backspace" || event.key == "ArrowUp") {
-                        const editorBlocks = editor.blocks.getBlocksCount();
+                        const editorBlocks = editor.current.blocks.getBlocksCount();
                         if (editorBlocks === 1) {
-                            const firstBlock = editor.blocks.getBlockByIndex(0);
+                            const firstBlock = editor.current.blocks.getBlockByIndex(0);
                             if (firstBlock.isEmpty) {
                                 document.getElementById("subtitle").focus();
                             }
@@ -329,7 +329,8 @@ const ArticleEditorPage = () => {
 
         // Change state and show time saved
         const dateSaved = new Date();
-        setStatusSaved(`Saved at ${formatDateManually(dateSaved)}`)
+        setStatusSaved(`Saved at ${formatDateManually(dateSaved)}`);
+        setStatusSavedError(false);
 
         // If the blog is created I want the submit button to become as it would be with the draft upload and reset the page
         setDraftStatus(true);
@@ -398,10 +399,12 @@ const ArticleEditorPage = () => {
     const deleteFile = useAdminDeleteFile();
     const [selectedFile, setSelectedFile] = useState<string | null>(null); // For thumbnail image
     const getContent = async (upload_images: boolean = false) => {
-        let body = (await editor?.save()) ? (await editor?.save()) : null;
+        let body = editor.current ? (await editor.current.save()) : null;
         if (body && !body["blocks"].length) {
             body = null; // If there is no body blocks delete it
         }
+
+        // Save images inside the body
         const body_images: string[] = [];
 
         // Create an array to hold all the Promises
@@ -410,11 +413,14 @@ const ArticleEditorPage = () => {
         // Hold all the upload images, in case there is an error it is more easy to delete them
         const uploadedImages: string[] = [];
 
-        // TODO Upload all images inside the body if they are not already inside the db
+        // This is needed in case some files need to be deleted from the database
+        const alreadyUploadedImages: string[] = [];
+
+        // Upload all images inside the body if they are not already inside the db
         if (body && body["blocks"]) {
             for (let block of body["blocks"]) {
                 if (block.type == "image") {
-                    if (upload_images) {
+                    if (upload_images && block.data.url) { // If also it isn't an empty string
                         /* 
                         STEPS
                         1. check for new values, to do so look and the urls that have blob: inside
@@ -426,7 +432,7 @@ const ArticleEditorPage = () => {
                                 uploadFile.mutate(await createFileFromBlobURL(block.data.url, "blog_article_body"), {
                                     onSuccess: ({ uploads }) => {
                                         block.data.url = uploads[0].url;
-                                        body_images.push(block.data.url);
+                                        body_images.push(uploads[0].url);
                                         uploadedImages.push(block.data.url);
 
                                         // Select the element using the data-id
@@ -454,6 +460,9 @@ const ArticleEditorPage = () => {
                                 })
                             })
                             uploadPromises.push(uploadPromise);
+                        } else {
+                            body_images.push(block.data.url);
+                            alreadyUploadedImages.push(block.data.url);
                         }
                     } else {
                         body_images.push(block.data.url)
@@ -462,24 +471,27 @@ const ArticleEditorPage = () => {
             }
         }
         // Upload thumbnail image
-        let thumbnail_image_url = document.getElementById("thumbnail") ? document.getElementById("thumbnail").src : null;
-        if (thumbnail_image_url && upload_images && thumbnail_image_url.includes("blob:")) {
-            const uploadPromise = new Promise(async (resolve, reject) => {
-                uploadFile.mutate(await createFileFromBlobURL(thumbnail_image_url, "blog_article_thumbnail"), {
-                    onSuccess: ({ uploads }) => {
-                        thumbnail_image_url = uploads[0].url;
-                        uploadedImages.push(thumbnail_image_url);
-                        setSelectedFile(thumbnail_image_url);
-                        resolve(undefined);
-                    },
-                    onError: () => {
-                        reject();
-                    }
+        let thumbnail_image_url = document.getElementById("thumbnail")?.src ?? null;
+        if (thumbnail_image_url && upload_images) {
+            if (thumbnail_image_url.includes('blob:')) {
+                const uploadPromise = new Promise(async (resolve, reject) => {
+                    uploadFile.mutate(await createFileFromBlobURL(thumbnail_image_url, "blog_article_thumbnail"), {
+                        onSuccess: ({ uploads }) => {
+                            thumbnail_image_url = uploads[0].url;
+                            uploadedImages.push(thumbnail_image_url);
+                            setSelectedFile(thumbnail_image_url);
+                            resolve(undefined);
+                        },
+                        onError: () => {
+                            reject();
+                        }
+                    })
                 })
-            })
-            uploadPromises.push(uploadPromise);
+                uploadPromises.push(uploadPromise);
+            } else {
+                alreadyUploadedImages.push(thumbnail_image_url)
+            }
         }
-        // TODO Delete all the image changes
 
         // Wait for all upload promises to resolve
         try {
@@ -504,7 +516,23 @@ const ArticleEditorPage = () => {
         this issue can be easily addressed with a cron job
         */
 
-        setImagesCache(uploadedImages);
+        // Delete images if they are not inside the body or thumbnail anymore
+        if (upload_images) {
+            console.log(imagesCache.current)
+            for (let image of imagesCache.current) {
+                if (!alreadyUploadedImages.includes(image)) {
+                    const file_key = image.split('/').slice(-1)[0];
+                    deleteFile.mutate({
+                        file_key: file_key
+                    })
+                }
+            }
+        }
+
+        if (upload_images) {
+            console.log(mergeUniqueArrays(alreadyUploadedImages, uploadedImages))
+            imagesCache.current = mergeUniqueArrays(alreadyUploadedImages, uploadedImages);
+        }
 
         let article = {
             author: document.getElementById("author")?.value,
@@ -518,7 +546,7 @@ const ArticleEditorPage = () => {
             title: document.getElementById("title")?.value,
             subtitle: document.getElementById("subtitle")?.value,
             body: body,
-            body_images: [],
+            body_images: body_images.length ? body_images : null,
 
             draft: draftStatus
         }
