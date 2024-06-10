@@ -1,8 +1,12 @@
-import { Container } from "@medusajs/ui";
+import { Container, Button } from "@medusajs/ui";
+import { XMarkMini } from "@medusajs/icons";
 
 export const ArticleCard = (props) => {
     return (
-        <Container className="container p-2 rounded-md h-72">
+        <Container className="container p-2 rounded-md h-72 relative">
+            <Button onClick={() => props.deleteHandlerPopup(props.article.id)} variant="danger" className="absolute top-5 left-5 p-0.5">
+                <XMarkMini />
+            </Button>
             <a href={`/a/article-editor?id=${props.article.id.split("blog_article_")[1]}`} className="flex flex-col gap-1">
                 <div className="w-full h-40 overflow-hidden rounded-md shadow-sm border border-dashed border-black/10">
                     {

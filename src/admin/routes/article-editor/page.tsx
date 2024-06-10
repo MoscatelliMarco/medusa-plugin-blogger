@@ -360,7 +360,7 @@ const ArticleEditorPage = () => {
             mutatePost({...articleContent}, {onSuccess: successAutoSave, onError: errorAutoSave});
         } else {
             // Delete element
-            mutateDelete({id: getIdFromCurrentUrl()}, {onSuccess: successAutoSave, onError: errorAutoSave})
+            mutateDelete({}, {onSuccess: successAutoSave, onError: errorAutoSave})
         }
     }
 
@@ -553,7 +553,7 @@ const ArticleEditorPage = () => {
 
         // Delete key if it is not mandatory and it does not exists
         for (let key of Object.keys(article)) {
-            if (!["title", "draft"].includes(key)) {
+            if (!["draft"].includes(key)) {
                 if (!article[key] || (Array.isArray(article[key]) && !article[key].length)) {
                     delete article[key]
                 }

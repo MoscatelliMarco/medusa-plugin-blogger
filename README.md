@@ -31,7 +31,7 @@ TODO add image of blog articles page and post article page
 Run the following command in the directory of the Medusa backend:
 
 ```bash
-yarn  add  medusa-plugin-blog
+yarn add medusa-plugin-blog
 ```
 
 ### Add to medusa-config.js
@@ -44,7 +44,7 @@ const  plugins = {
 	{
 		resolve: 'medusa-plugin-blog',
 		options: {
-				enableUI: true,
+			enableUI: true,
 		},
 	}
 }
@@ -55,7 +55,7 @@ const  plugins = {
 Run the following command from the root of the project to udpate database with a new table required for storing product variant
 
 ```bash
-npx  medusa  migrations  run
+npx medusa migrations run
 ```
   
 # API endpoints

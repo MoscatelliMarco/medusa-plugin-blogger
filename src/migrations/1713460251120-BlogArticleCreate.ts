@@ -14,7 +14,7 @@ export class CreateBlogPostTable1713183081316 implements MigrationInterface {
                 { name: "url_slug", type: "varchar", isNullable: true, isUnique: true },
                 { name: "seo_description", type: "varchar", isNullable: true, isUnique: true },
                 { name: "thumbnail_image", type: "varchar", isNullable: true },
-                { name: "title", type: "varchar" },
+                { name: "title", type: "varchar", isNullable: true },
                 { name: "subtitle", type: "varchar", isNullable: true },
                 { name: "body", type: "jsonb", isNullable: true },
                 { name: "body_images", type: "text[]", isNullable: true},

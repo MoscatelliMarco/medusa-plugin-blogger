@@ -33,7 +33,7 @@ export class BlogArticle extends BaseEntity {
     @Column({ nullable: true })
     thumbnail_image: string;
 
-    @Column({ nullable: false })
+    @Column({ nullable: true })
     title: string;
 
     @Column({ nullable: true })
