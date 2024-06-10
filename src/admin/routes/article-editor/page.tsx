@@ -20,15 +20,16 @@ import CodeTool from "@editorjs/code";
 import Marker from "@editorjs/marker";
 import InlineCode from "@editorjs/inline-code";
 import Underline from "@editorjs/underline";
+import useTimedState from "../../../javascript/useTimedState";
 
 const ArticleEditorPage = () => {
     const [show_upload, setShowUpload] = useState(false);
     const [uploadOpened, setUploadOpened] = useState(false);
-    const [submitError, setSubmitError] = useState("");
-    const [submitSuccess, setSubmitSuccess] = useState("");
+    const [submitError, setSubmitError] = useTimedState("", 5000);
+    const [submitSuccess, setSubmitSuccess] = useTimedState("", 5000);
     const [statusSaved, setStatusSaved] = useState("Not saved");
     const [statusSavedError, setStatusSavedError] = useState(false);
-    const [draftStatus, setDraftStatus] = useState(true);
+    const [draftStatus, setDraftStatus] = useTimedState(true, 5000);
     const [isIdValid, setIsIdValid] = useState(true);
     const [inputs, setInputs] = useState({
         title: "",

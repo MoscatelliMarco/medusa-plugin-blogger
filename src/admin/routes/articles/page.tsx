@@ -12,6 +12,7 @@ import { Button, Container, Input } from "@medusajs/ui";
 import { useEffect, useState } from "react";
 import { useAdminCustomQuery, useAdminCustomDelete, useAdminDeleteFile } from "medusa-react";
 import { createPathRequest } from "../../../javascript/utils";
+import useTimedState from "../../../javascript/useTimedState";
 
 const ArticlePage = () => {
     const [error, setError] = useState("");
@@ -30,8 +31,8 @@ const ArticlePage = () => {
     // Handler in case an article needs to be deleted
     const [articleIdDelete, setArticleIdDelete] = useState<string>("");
     const [deletePopupShow, setDeletePopupShow] = useState<boolean>(false);
-    const [deleteError, setDeleteError] = useState<string | null>(null);
-    const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
+    const [deleteError, setDeleteError] = useTimedState(null, 5000);
+    const [deleteSuccess, setDeleteSuccess] = useTimedState(null, 5000);
     const customDelete = useAdminCustomDelete(
         createPathRequest(articleIdDelete), []
     )
