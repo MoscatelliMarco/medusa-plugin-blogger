@@ -2,7 +2,7 @@
   <p align="center">
     <img alt="Medusa" src="https://i.imgur.com/1JHWUTL.png" width="200" />
   </p>
-<h1>Awesome MedusaJS</h1>
+<h1>Medusa Plugin Blog</h1>
 <p>A blog integration for medusa</p>
 </div>
 
