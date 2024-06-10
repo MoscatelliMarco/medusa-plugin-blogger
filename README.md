@@ -92,3 +92,9 @@ Medusa-Plugin-Blog relies on several key dependencies to provide a rich user exp
 # License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+### Stargazers
+[![Stargazers repo roster for @MoscatelliMarco/medusa-plugin-blog](https://reporoster.com/stars/MoscatelliMarco/medusa-plugin-blog)](https://github.com/MoscatelliMarco/medusa-plugin-blog/stargazers)
+
+### Forkers
+[![Forkers repo roster for @MoscatelliMarco/medusa-plugin-blog](https://reporoster.com/forks/MoscatelliMarco/medusa-plugin-blog)](https://github.com/MoscatelliMarco/medusa-plugin-blog/network/members)
