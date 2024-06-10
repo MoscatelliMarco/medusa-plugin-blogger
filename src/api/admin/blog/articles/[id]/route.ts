@@ -14,7 +14,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         let anyreq = req as any; // Needed to not receive type errors
         const id = anyreq.params.id;
         let article = await articleRepo.findOneBy({
-            id: "blog_article_" + MySqlSanitization(id)
+            id: MySqlSanitization(id).includes("blog_article_") ? MySqlSanitization(id) : "blog_article_" + MySqlSanitization(id)
         });
 
         return res.json({
@@ -34,7 +34,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         let anyreq = req as any; // Needed to not receive type errors
         const id = anyreq.params.id;
         let article = await articleRepo.findOneBy({
-            id: "blog_article_" + MySqlSanitization(id)
+            id: MySqlSanitization(id).includes("blog_article_") ? MySqlSanitization(id) : "blog_article_" + MySqlSanitization(id)
         });
 
         if (!article) {
@@ -79,7 +79,7 @@ export const DELETE = async (req: MedusaRequest, res: MedusaResponse) => {
         let anyreq = req as any; // Needed to not receive type errors
         const id = anyreq.params.id;
         let article = await articleRepo.delete({
-            id: "blog_article_" + MySqlSanitization(id)
+            id: MySqlSanitization(id).includes("blog_article_") ? MySqlSanitization(id) : "blog_article_" + MySqlSanitization(id)
         });
 
         return res.json({

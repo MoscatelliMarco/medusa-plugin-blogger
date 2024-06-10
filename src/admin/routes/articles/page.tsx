@@ -31,7 +31,7 @@ const ArticlePage = () => {
     const [articleIdDelete, setArticleIdDelete] = useState<string>("");
     const [deletePopupShow, setDeletePopupShow] = useState<boolean>(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
-    const [successError, setSuccessError] = useState<string | null>(null);
+    const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
     const customDelete = useAdminCustomDelete(
         createPathRequest(articleIdDelete), []
     )
@@ -61,11 +61,25 @@ const ArticlePage = () => {
                 uploadPromises.push(uploadPromise);
             }
         }
+        if (article.thumbnail_image) {
+            let file_key = article.thumbnail_image.split('/').slice(-1)[0];
+                const uploadPromise = new Promise(async (resolve, reject) => {
+                    deleteFile.mutate({ file_key: file_key }, {
+                        onSuccess: () => {
+                            resolve(undefined);
+                        },
+                        onError: () => {
+                            reject();
+                        }
+                    })
+                })
+            uploadPromises.push(uploadPromise);
+        }
 
         try {
             await Promise.all(uploadPromises);
         } catch (e) {
-            setSuccessError("");
+            setDeleteSuccess("");
             return setDeleteError("One or more images inside the article could not be deleted")
         }
 
@@ -77,11 +91,12 @@ const ArticlePage = () => {
         )
     }
     function successDelete() {
-        setSuccessError("Article deleted successfully");
+        data["articles"] = data["articles"].filter(article => article.id != articleIdDelete);
+        setDeleteSuccess("Article deleted successfully");
         setDeleteError(null);
     }
     function errorDelete() {
-        setSuccessError(null);
+        setDeleteSuccess(null);
         setDeleteError("Couldn't connect to the server, by mindful that the images inside the article are deleted");
     }
 
@@ -95,10 +110,10 @@ const ArticlePage = () => {
                         <p className="text-xs text-gray-600">This action can't be undone</p>
                     </div>
                     <div className="flex justify-center w-full gap-4">
-                        <Button variant="secondary" size="small" className="px-5 py-1" onClick={() => {setDeletePopupShow(false)}}>
+                        <Button variant="secondary" size="small" className="px-5 py-1 text-sm" onClick={() => {setDeletePopupShow(false)}}>
                             Cancel
                         </Button>
-                        <Button variant="danger" size="small" className="px-5 py-1" onClick={() => {setDeletePopupShow(false); deleteArticle()}}>
+                        <Button variant="danger" size="small" className="px-5 py-1 text-sm" onClick={() => {setDeletePopupShow(false); deleteArticle()}}>
                             Delete
                         </Button>
                     </div>
@@ -130,7 +145,7 @@ const ArticlePage = () => {
                 </div>
             </div>
             {
-                (deleteError || successError) ?
+                (deleteError || deleteSuccess) ?
                 <div className="flex justify-center">
                     {
                         deleteError ? 
@@ -140,9 +155,9 @@ const ArticlePage = () => {
                         ""
                     }
                     {
-                        successError ? 
-                        <p className="text-center max-w-lg font-medium text-red-500">
-                            {successError}
+                        deleteSuccess ? 
+                        <p className="text-center max-w-lg font-medium text-blue-500">
+                            {deleteSuccess}
                         </p> :
                         ""
                     }

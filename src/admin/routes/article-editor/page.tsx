@@ -530,7 +530,6 @@ const ArticleEditorPage = () => {
         }
 
         if (upload_images) {
-            console.log(mergeUniqueArrays(alreadyUploadedImages, uploadedImages))
             imagesCache.current = mergeUniqueArrays(alreadyUploadedImages, uploadedImages);
         }
 
