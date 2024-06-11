@@ -64,10 +64,25 @@ npx medusa migrations run
 
 ```GET /store/blog/articles```
 
-Returns a json object of all the articles respecting the conditions passed as body, this endpoint accepts bodies to do a conditional search using TypeORM find parameter, `blog_articles` can be search using any filter found in the PostgreSQL documentation, a body should be structured this way:
+Returns a json object of all the articles respecting the conditions passed as query parameters, this endpoint accepts query parameters to do a conditional search using TypeORM find parameter, `blog_articles` can be search using any filter found in the PostgreSQL documentation, because only query parameters are accepted, a function to convert objects to query parameters is provided down here:
 
-```json
-{
+```typescript
+export const objectToQueryString = (obj) => {
+    return Object.keys(obj)
+        .map(key => {
+            if (Array.isArray(obj[key]) || typeof obj[key] == "object") {
+                encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(obj[key]))
+            } else {
+                encodeURIComponent(key) + '=' + encodeURIComponent(obj[key])
+            }
+        }).join('&');
+}
+```
+
+Here is an example with a commonly found object:
+
+```typescript
+const example_object = {
 	"where": {
 		"id": "01HZHPGPY4MTR97EVX6FDDEXZE"
 	},
@@ -78,19 +93,23 @@ Returns a json object of all the articles respecting the conditions passed as bo
 		"created_at": "ASC"
 	}
 }
+console.log(objectToQueryString(example_object))
 ```
 
+Output: `where=%7B%22id%22%3A%2201HZHPGPY4MTR97EVX6FDDEXZE%22%7D&take=7&skip=2&select=%5B%22title%22%2C%22subtitle%22%2C%22body%22%5D&order=%7B%22created_at%22%3A%22ASC%22%7D`
+This output may look strange at first, almost impossible to understand, but the api routes already parse this url properly into the object that will be passed to search the database.
+
 See the [Typeorm documentation](https://orkhan.gitbook.io/typeorm/docs/find-options) to understand better what every of this parameters does, keep in mind that the behavior of where is a little bit different from the one in the documentation, there are some things to take into consideration:
-- The search works using an equal condition, for keys where the value is not `id` or `tags`, for example if you want to search for an element that has the title "I like pizza", the json body that you'll need to send in the request is `{ where { title: "I like pizza" } }`
+- The search works using an equal condition, for keys where the value is not `id` or `tags`, for example if you want to search for an element that has the title "I like pizza", the query parameters that you'll need to send in the request is `{ where { title: "I like pizza" } }`
 - IDs can be fetched with these two formats `blog_article_01HZHPGPY4MTR97EVX6FDDEXZE` and `01HZHPGPY4MTR97EVX6FDDEXZE`, both versions are valid
-- When adding a `tags` key to the body, they must be an array and the database will be searched for an element that has at least all the tags inside the `tags` value in the body
-- We do not yet allow searches over the body
+- When adding a `tags` key to the body, they must be an array and the database will be searched for an element that has at least all the tags inside the `tags` value in the query parameters
+- We do not yet support searches over the body of the article
 
 ## Admin endpoints
 
 #### ```GET /admin/blog/articles```
 
-Returns a json object of all the articles respecting the conditions passed as body, it works that same way as the homonymous store API routes.
+Returns a json object of all the articles respecting the conditions passed as query parameters, it works that same way as the homonymous store API routes.
 
 #### ```POST /admin/blog/articles```
 
