@@ -223,10 +223,11 @@ const ArticleEditorPage = () => {
                 const autoResizeInputs = document.querySelectorAll(".auto-resize");
                 for (let input of autoResizeInputs) {
                     input.addEventListener("input", autoResize, false);
+                    autoResize();
 
                     function autoResize() {
-                        this.style.height = "auto";
-                        this.style.height = this.scrollHeight + "px";
+                        input.style.height = "auto";
+                        input.style.height = input.scrollHeight + "px";
                     }
                 }
 
