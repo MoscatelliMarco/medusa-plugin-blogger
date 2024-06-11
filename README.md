@@ -11,7 +11,7 @@
 2. [Getting started](#getting-started)
 3. [API endpoints](#api-endpoints)
 4. [UI guide](#ui-guide)
-5. [Architecture overview](architecture-overview)
+5. [Architecture overview](#architecture-overview)
 
 ---
 
