@@ -167,7 +167,7 @@ const ArticlePage = () => {
             }
             {
                 isLoading ?
-                    (<p className="text-center max-w-sm text-green-500 mt-4 font-medium">Loading...</p>)
+                    (<p className="text-center max-w-sm mt-4 font-medium">Loading...</p>)
                 :
                 (
                     !error ? 
