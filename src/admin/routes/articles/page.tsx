@@ -23,11 +23,18 @@ const ArticlePage = () => {
         [""]
     )
 
+    /* 
+    The GET request will change over time as the filters/order changes for this reason a state
+    which keeps everything in order is required.
+    */
+    const [ articles, setArticles ] = useState([]);
+
     useEffect(() => {
         if (data?.error) {
-            setError(data.error)
+            setError(data.error);
+        } else if (data?.articles) {
+            setArticles(data.articles);
         }
-        console.log(data)
     }, [data]);
 
     // Handler in case an article needs to be deleted
@@ -45,7 +52,7 @@ const ArticlePage = () => {
         setArticleIdDelete(id);
     }
     async function deleteArticle() {
-        const article = data["articles"].filter(article => article.id == articleIdDelete)[0];
+        const article = articles.filter(article => article.id == articleIdDelete)[0];
 
         const uploadPromises = [];
         if (article.body_images) {
@@ -94,7 +101,7 @@ const ArticlePage = () => {
         )
     }
     function successDelete() {
-        data["articles"] = data["articles"].filter(article => article.id != articleIdDelete);
+        setArticles(articles => articles.filter(article => article.id != articleIdDelete))
         setDeleteSuccess("Article deleted successfully");
         setDeleteError(null);
     }
@@ -174,9 +181,9 @@ const ArticlePage = () => {
                 (
                     !error ? 
                         // JSON.stringify(data)
-                        (data["articles"] && data["articles"].length ? 
+                        (articles && articles.length ? 
                         <div className="grid grid-cols-3 w-full gap-x-3 gap-y-2.5">
-                            {data["articles"].map((article) => 
+                            {articles.map((article) => 
                             <ArticleCard article={article} key={article.id} deleteHandlerPopup={deleteHandlerPopup}
                         />)}
                         </div> :
