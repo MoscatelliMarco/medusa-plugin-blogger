@@ -8,18 +8,29 @@ import { MySqlSanitizationObj } from "../../../../javascript/mysql_sanitization"
 import { convertObjToSearchQuery } from "../../../../javascript/utils";
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
+    let search_params: any;
     try {
         const manager: EntityManager = req.scope.resolve("manager");
         const articleRepo = manager.getRepository(BlogArticle);
         
-        let filters = MySqlSanitizationObj(req.body);
+        search_params = {};
+        const anyreq = req as any;
+
+        let filters = MySqlSanitizationObj(anyreq.body.where);
         filters = convertObjToSearchQuery(filters);
+        search_params["where"] = filters;
+
+        const { select, order, skip, take } = anyreq.body;
+        if (select) search_params["select"] = select;
+        if (order) search_params["order"] = order;
+        if (typeof skip !== 'undefined') search_params.skip = skip;
+        if (typeof take !== 'undefined') search_params.take = take;
 
         return res.json({
-            articles: await articleRepo.find({ where: filters }), 
-            sanitized_query: filters
+            articles: await articleRepo.find(search_params), 
+            sanitized_query: search_params
         })
     } catch (e) {
-        return res.json({error: e.toString(), error_obj: e})
+        return res.json({error: e.toString(), error_obj: e, search_params: search_params})
     }
 }
