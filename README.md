@@ -71,9 +71,9 @@ export const objectToQueryString = (obj) => {
     return Object.keys(obj)
         .map(key => {
             if (Array.isArray(obj[key]) || typeof obj[key] == "object") {
-                encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(obj[key]))
+                return encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(obj[key]))
             } else {
-                encodeURIComponent(key) + '=' + encodeURIComponent(obj[key])
+                return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key])
             }
         }).join('&');
 }

@@ -12,13 +12,14 @@ import { Button, Container, Input } from "@medusajs/ui";
 import { useEffect, useState } from "react";
 import { useAdminCustomQuery, useAdminCustomDelete, useAdminDeleteFile } from "medusa-react";
 import { createPathRequest } from "../../../javascript/utils";
+import { objectToQueryString } from "../../../javascript/parse_query_params";
 import useTimedState from "../../../javascript/useTimedState";
 
 const ArticlePage = () => {
     const [error, setError] = useState("");
 
     const { data, isLoading } = useAdminCustomQuery(
-        "/blog/articles",
+        "/blog/articles?" + objectToQueryString({select: ["id", "thumbnail_image", "body_images" , "title", "subtitle", "created_at"]}),
         [""]
     )
 
@@ -26,6 +27,7 @@ const ArticlePage = () => {
         if (data?.error) {
             setError(data.error)
         }
+        console.log(data)
     }, [data]);
 
     // Handler in case an article needs to be deleted
