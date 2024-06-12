@@ -1,5 +1,5 @@
 import { Container, Button } from "@medusajs/ui";
-import { XMarkMini } from "@medusajs/icons";
+import { Trash } from "@medusajs/icons";
 
 export const ArticleCard = (props) => {
     return (
@@ -35,7 +35,7 @@ export const ArticleCard = (props) => {
                             {props.article.created_at.split("T")[0]}
                         </p>
                         <Button onClick={(event) => {props.deleteHandlerPopup(props.article.id); event.stopPropagation(); event.preventDefault();}} variant="danger" size="small" className="flex items-center text-sm">
-                            <XMarkMini />
+                            <Trash />
                             <span>Delete</span>
                         </Button>
                     </div>
