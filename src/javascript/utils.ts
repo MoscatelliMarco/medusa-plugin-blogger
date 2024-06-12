@@ -6,7 +6,7 @@ Module not found: Error: Can't resolve 'react-native-sqlite-storage'
 
 Which at the time I am writing this comment is not causing any visible problem
 */
-import { ILike, Raw } from "typeorm"
+import { ILike, Like, Raw } from "typeorm"
 
 export const listenChangesSave = (debounceAutoSave) => {
     const title = document.getElementById("title");
@@ -82,16 +82,20 @@ export const removeIdFromCurrentUrl = () => {
 
 export const createPathRequest = (articleId, base_path = "/blog/articles") => articleId ? base_path + "/" + articleId : base_path
 
-export const convertObjToSearchQuery = (obj) => {
+export const convertObjToSearchQuery = (obj, use_ilike=false) => {
     const result = {};
     for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
             if (obj[key]) {
                 if (typeof obj[key] == "string") {
                     if (key == "id") {
-                        result[key] = ILike("%" + obj[key].replace(/[%_]/g, '\\$&'));
+                        result[key] = Like("%" + obj[key].replace(/[%_]/g, '\\$&'));
                     } else {
-                        result[key] = ILike(obj[key].replace(/[%_]/g, '\\$&'));
+                        if (use_ilike) {
+                            result[key] = ILike(obj[key]);
+                        } else {
+                            result[key] = Like(obj[key]);
+                        }
                     }
                 } else if (Array.isArray(obj[key]) && key == "tags") { // Only works with the column tags
                     const tagsString = `{${obj[key].join(',')}}`;

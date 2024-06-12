@@ -11,7 +11,6 @@ export const MySqlSanitization = (value) => {
                 case "\"": return "\\\"";
                 case "'": return "\\'";
                 case "\\": return "\\\\";
-                case "%": return "\\%";
                 default: return char;
             }
         });
