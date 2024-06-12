@@ -39,7 +39,6 @@ const ArticlePage = () => {
 
     // Handler in case an article needs to be deleted
     const [articleIdDelete, setArticleIdDelete] = useState<string>("");
-    const [deletePopupShow, setDeletePopupShow] = useState<boolean>(false);
     const [deleteError, setDeleteError] = useTimedState(null, 5000);
     const [deleteSuccess, setDeleteSuccess] = useTimedState(null, 5000);
     const customDelete = useAdminCustomDelete(
@@ -47,10 +46,11 @@ const ArticlePage = () => {
     )
     const mutateDelete = customDelete.mutate;
     const deleteFile = useAdminDeleteFile();
-    function deleteHandlerPopup(id: string) {
-        setDeletePopupShow(true);
-        setArticleIdDelete(id);
-    }
+    useEffect(() => {
+        if (articleIdDelete) {
+            deleteArticle();
+        }
+    }, [articleIdDelete])
     async function deleteArticle() {
         const article = articles.filter(article => article.id == articleIdDelete)[0];
 
@@ -112,25 +112,6 @@ const ArticlePage = () => {
 
     return (
         <div className="flex flex-col gap-7 items-center break-words relative">
-            { deletePopupShow ? 
-            <div style={{transform: "scale(1.2"}} className="z-50 top-0 left-0 h-full w-full backdrop-blur-lg rounded-lg absolute grid place-items-center">
-                <Container className="flex flex-col justify-center gap-5 text-center max-w-md items-center">
-                    <div className="flex flex-col gap-3 items-center justify-center">
-                        <p className="text-lg font-medium">Are you sure your want to delete this article?</p>
-                        <p className="text-xs text-gray-600">This action can't be undone</p>
-                    </div>
-                    <div className="flex justify-center w-full gap-4">
-                        <Button variant="secondary" size="small" className="px-5 py-1 text-sm" onClick={() => {setDeletePopupShow(false)}}>
-                            Cancel
-                        </Button>
-                        <Button variant="danger" size="small" className="px-5 py-1 text-sm" onClick={() => {setDeletePopupShow(false); deleteArticle()}}>
-                            Delete
-                        </Button>
-                    </div>
-                </ Container>
-            </div>:
-            ""
-            }
             <div className="flex justify-between items-center w-full">
                 <Link to="/a/article-editor">
                     <Button variant="primary">
@@ -184,7 +165,7 @@ const ArticlePage = () => {
                         (articles && articles.length ? 
                         <div className="grid grid-cols-3 w-full gap-x-3 gap-y-2.5">
                             {articles.map((article) => 
-                            <ArticleCard article={article} key={article.id} deleteHandlerPopup={deleteHandlerPopup}
+                            <ArticleCard article={article} key={article.id} setArticleIdDelete={setArticleIdDelete}
                         />)}
                         </div> :
                         <p className="max-w-sm w-full text-center mt-4 font-medium">No articles yet</p>
