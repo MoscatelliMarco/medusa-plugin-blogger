@@ -7,9 +7,9 @@ import {
     TrianglesMini,
     Trash
 } from "@medusajs/icons";
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
-const ToolBar = () => {
+const ToolBar = (props) => {
     const [ showMenu, setShowMenu ] = useState<boolean>(false);
     const [ contentMenu, setContentMenu ] = useState<"filter"| "sort" | null>(null);
     const [ filters, setFilters ] = useState([]);
@@ -70,8 +70,36 @@ const ToolBar = () => {
         {
             "label": "<",
             "value": "lower"
-        }
+        },
+        {
+            "label": "Like",
+            "value": "lower"
+        },
+        {
+            "label": "ILike",
+            "value": "lower"
+        },
     ])
+
+    const [ sort, setSort ] = useState({
+        order_by: null,
+        field: null
+    })
+    // This two function are needed because the Select component doesn't accept custom functions
+    const changeOrderBy = (value) => setSort(sort => {return {...sort, order_by: value}});
+    const changeField = (value) => setSort(sort => {return {...sort, field: value}});
+    useEffect(() => {
+        if (sort.order_by && sort.field) {
+            props.setFiltersSort(filter_sort => {
+                return {
+                    ...filter_sort, 
+                    order: {
+                        [sort.field]: sort["order_by"]
+                    }
+                }
+            })
+        }
+    }, [JSON.stringify(sort)])
 
     return (
         <div className="flex flex-col w-full gap-2">
@@ -189,24 +217,24 @@ const ToolBar = () => {
                                 Sort by
                             </p>
                             <div className="flex gap-4 items-center">
-                                <Select>
+                                <Select onValueChange={changeField}>
                                     <Select.Trigger>
                                         <Select.Value placeholder="Select a field to sort" />
                                     </Select.Trigger>
                                     <Select.Content>
-                                        {sortTypes.current.map((item) => (
+                                        {columns.current.map((item) => (
                                             <Select.Item key={item.value} value={item.value}>
                                                 {item.label}
                                             </Select.Item>
                                         ))}
                                     </Select.Content>
                                 </Select>
-                                <Select>
+                                <Select onValueChange={changeOrderBy}>
                                     <Select.Trigger>
-                                        <Select.Value placeholder="Select a value to sort" />
+                                        <Select.Value placeholder="Select an order to sort" />
                                     </Select.Trigger>
                                     <Select.Content>
-                                        {columns.current.map((item) => (
+                                        {sortTypes.current.map((item) => (
                                             <Select.Item key={item.value} value={item.value}>
                                                 {item.label}
                                             </Select.Item>

@@ -5,7 +5,7 @@ import { useState } from "react";
 export const ArticleCard = (props) => {
     const [showConfirmationDelete, setShowConfirmationDelete] = useState(false);
     return (
-        <Container className="container p-2 rounded-md min-h-72 relative">
+        <Container className="container p-2 rounded-md min-h-72 relative h-full">
             {
                 showConfirmationDelete ?
                 <div onClick={() => {setShowConfirmationDelete(false);}} className="absolute z-20 top-0 left-0 w-full h-full backdrop-blur-md flex flex-col gap-0.5 items-center text-center justify-center">
@@ -41,11 +41,11 @@ export const ArticleCard = (props) => {
                     }
                 </div>
                 <div className="flex flex-col gap-2 justify-between p-1 h-full">
-                    <div className="flex flex-col">
-                        <h3 className="text-lg font-medium">{props.article.title?.length > 60 ? 
+                    <div className="flex flex-col gap-1">
+                        <h3 className="text-lg leading-tight font-medium">{props.article.title?.length > 60 ? 
                         props.article.title.slice(0, 60).trim() + "..." : 
                         (props.article.title || <span className="text-gray-500/90">Missing title</span>)}</h3>
-                        <p className="text-gray-600 -mt-0.5">{props.article.subtitle?.length > 100 ? 
+                        <p className="text-gray-600 leading-tight -mt-0.5">{props.article.subtitle?.length > 100 ? 
                         props.article.subtitle.slice(0, 100).trim() + "..." : 
                         (props.article.subtitle || <span className="text-gray-400">Missing subtitle</span>)}</p>
                     </div>

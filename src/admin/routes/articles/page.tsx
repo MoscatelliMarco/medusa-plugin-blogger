@@ -1,7 +1,8 @@
 import { RouteConfig } from "@medusajs/admin";
 import { DocumentSeries } from "@medusajs/icons";
+import { Button } from "@medusajs/ui";
 import { ArticleCard } from "../../../ui-components/article_card";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAdminCustomQuery, useAdminCustomDelete, useAdminDeleteFile } from "medusa-react";
 import { createPathRequest } from "../../../javascript/utils";
 import { objectToQueryString } from "../../../javascript/parse_query_params";
@@ -9,10 +10,24 @@ import useTimedState from "../../../javascript/useTimedState";
 import ToolBar from "../../../ui-components/tool_bar";
 
 const ArticlePage = () => {
+    // Error loading the initial page
     const [error, setError] = useState("");
 
+    // Keep track of articles loadings
+    const [ articlesCount, setArticlesCount ] = useState({
+        take: 3,
+        skip: 0
+    });
+    const [ filtersSort, setFiltersSort ] = useState({});
+
     const { data, isLoading } = useAdminCustomQuery(
-        "/blog/articles?" + objectToQueryString({select: ["id", "thumbnail_image", "body_images" , "title", "subtitle", "created_at"]}),
+        "/blog/articles?" + objectToQueryString(
+            {
+                select: ["id", "thumbnail_image", "body_images" , "title", "subtitle", "created_at"],
+                take: articlesCount.take,
+                skip: articlesCount.skip,
+                ...filtersSort
+            }),
         [""]
     )
 
@@ -22,13 +37,47 @@ const ArticlePage = () => {
     */
     const [ articles, setArticles ] = useState([]);
 
+    const [ articlesLoadState, setArticlesLoadState ] = useTimedState(null, 7000);
+    const previousNumberArticles = useRef(0);
+
     useEffect(() => {
-        if (data?.error) {
-            setError(data.error);
-        } else if (data?.articles) {
-            setArticles(data.articles);
+        if (JSON.stringify(filtersSort) != "{}") {
+            setArticlesCount((articles_count) => {
+                return {...articles_count, skip: 0}
+            })
+            setArticles([]);
+            previousNumberArticles.current = 0;
+        }
+    }, [JSON.stringify(filtersSort)])
+
+    useEffect(() => {
+        if (data) {
+            if (data?.error) {
+                if (previousNumberArticles.current == 0) {
+                    setError(data.error);
+                } else {
+                    // If it is not the first load don't show a full page error
+                    setArticlesLoadState("Unable to load more articles: " + data.error)
+                }
+            } else if (data?.articles) {
+                setArticles(articles => [...articles, ...data.articles]);
+
+                const current_articles_length = [...articles, ...data.articles].length;
+                // If the article number is the same and the number of articles is not zero show a load more error
+                if (previousNumberArticles.current == current_articles_length && previousNumberArticles.current != 0) {
+                    setArticlesLoadState("There are no more articles left")
+                }
+                previousNumberArticles.current = current_articles_length;
+            } else {
+                setError("We couldn't find any articles, this is probably a bug of the plugin, so please file a report");
+            }
         }
     }, [data]);
+    function loadMoreArticles() {
+        setArticlesCount(articles_count => {
+            return {...articles_count, skip: articles.length}
+        })
+    }
 
     // Handler in case an article needs to be deleted
     const [articleIdDelete, setArticleIdDelete] = useState<string>("");
@@ -104,8 +153,8 @@ const ArticlePage = () => {
     }
 
     return (
-        <div className="flex flex-col gap-7 items-center break-words relative">
-            <ToolBar />
+        <div className="flex flex-col gap-7 items-center break-words relative mb-12">
+            <ToolBar setFiltersSort={setFiltersSort}/>
             {
                 (deleteError || deleteSuccess) ?
                 <div className="flex justify-center">
@@ -136,8 +185,10 @@ const ArticlePage = () => {
                         (articles && articles.length ? 
                         <div className="grid grid-cols-3 w-full gap-x-3 gap-y-2.5">
                             {articles.map((article) => 
-                            <ArticleCard article={article} key={article.id} setArticleIdDelete={setArticleIdDelete}
-                        />)}
+                                <div key={article.id} className="h-full">
+                                    <ArticleCard article={article} setArticleIdDelete={setArticleIdDelete}/>
+                                </div>
+                            )}
                         </div> :
                         <p className="max-w-sm w-full text-center mt-4 font-medium">No articles yet</p>
                         )
@@ -146,6 +197,22 @@ const ArticlePage = () => {
                         typeof error === 'object' ? JSON.stringify(error) : error
                         }</p>)
                 )
+            }
+            {
+                !isLoading ? 
+                <div>
+                    <Button onClick={loadMoreArticles}>
+                        Load more
+                    </Button>
+                </div> :
+                ""
+            }
+            {
+                articlesLoadState ?
+                <p className="text-center max-w-xl font-medium">
+                    {articlesLoadState}
+                </p> :
+                ""
             }
         </div>
     );
