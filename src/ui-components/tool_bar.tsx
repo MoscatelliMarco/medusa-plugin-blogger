@@ -148,7 +148,7 @@ const ToolBar = (props) => {
             if (filter.field && filter.operation && filter.value) {
                 if (filter.operation != "Equal") {
                     where_object[filter.field] = {
-                        find_operation: filter.operation,
+                        find_operator: filter.operation,
                         value: filter.value
                     }
                 } else {
@@ -157,6 +157,10 @@ const ToolBar = (props) => {
             }
         }
         props.setFiltersSort(filters_sort => {
+            console.log({
+                ...filters_sort,
+                where: where_object
+            })
             return {
                 ...filters_sort,
                 where: where_object
