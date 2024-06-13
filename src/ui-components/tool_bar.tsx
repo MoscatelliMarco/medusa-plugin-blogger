@@ -12,7 +12,6 @@ import { useState, useEffect, useRef } from "react";
 const ToolBar = (props) => {
     const [ showMenu, setShowMenu ] = useState<boolean>(false);
     const [ contentMenu, setContentMenu ] = useState<"filter"| "sort" | null>(null);
-    const [ filters, setFilters ] = useState([]);
 
     const sortTypes = useRef([
         {
@@ -61,23 +60,31 @@ const ToolBar = (props) => {
     const filterOperations = useRef([
         {
             "label": "=",
-            "value": "equal"
+            "value": "Equal"
         },
         {
             "label": ">",
-            "value": "higher"
+            "value": "MoreThan"
         },
         {
             "label": "<",
-            "value": "lower"
+            "value": "LessThan"
+        },
+        {
+            "label": ">=",
+            "value": "MoreThanOrEqual"
+        },
+        {
+            "label": "<=",
+            "value": "LessThanOrEqual"
         },
         {
             "label": "Like",
-            "value": "lower"
+            "value": "Like"
         },
         {
             "label": "ILike",
-            "value": "lower"
+            "value": "ILike"
         },
     ])
 
@@ -100,6 +107,62 @@ const ToolBar = (props) => {
             })
         }
     }, [JSON.stringify(sort)])
+
+    const [ filters, setFilters ] = useState([]);
+    const next_filter_id = useRef(1);
+    function newFilter() {
+        setFilters(filters => {
+            return [
+                ...filters, {
+                    id: next_filter_id.current,
+                    field: "",
+                    operation: "",
+                    value: ""
+                }
+            ]
+        })
+    }
+    useEffect(() => {
+        next_filter_id.current += 1;
+    }, [filters.length])
+    function setValueFilter(input_value) {
+        const [ value, id, type ] = input_value.split("---");
+        setFilters(filters_element => filters_element.map(filter => 
+            filter.id == id ? {...filter, [type == "columns" ? "field" : "operation"]: value } : filter
+        ));
+    }
+    function setInputValueFilter(event) {
+        setFilters(filters_element => filters_element.map(filter => 
+            filter.id == event.target.dataset.id ? {...filter, value: event.target.value} : filter
+        ));
+    }
+    function setDeleteFilter(event) {
+        setFilters(filters => {
+            return filters.filter(filter => filter.id != event.target.dataset.id)
+        })
+    }
+    useEffect(() => {
+        const where_object = {};
+
+        for (let filter of filters) {
+            if (filter.field && filter.operation && filter.value) {
+                if (filter.operation != "Equal") {
+                    where_object[filter.field] = {
+                        find_operation: filter.operation,
+                        value: filter.value
+                    }
+                } else {
+                    where_object[filter.field] = filter.value;
+                }
+            }
+        }
+        props.setFiltersSort(filters_sort => {
+            return {
+                ...filters_sort,
+                where: where_object
+            }
+        });
+    }, [JSON.stringify(filters)])
 
     return (
         <div className="flex flex-col w-full gap-2">
@@ -135,11 +198,6 @@ const ToolBar = (props) => {
                         <Funnel />
                         Filter
                     </Button>
-                    <div className="relative">
-                        <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                        {/* <input type="text" className="focus:outline-none border border-gray-300 rounded-md py-1.5 pr-4 pl-10 placeholder-gray-400" placeholder="Search" /> */}
-                        <Input className="bg-white" type="search" />
-                    </div>
                 </div>
             </div>
             {
@@ -152,32 +210,23 @@ const ToolBar = (props) => {
                                 Filter
                             </p>
                             <div className="flex flex-col gap-2">
-                                <Button onClick={() => {
-                                    setFilters(filters => {
-                                        return [
-                                            ...filters, {
-                                                field: "",
-                                                filterOperaion: ""
-                                            }
-                                        ]
-                                    })
-                                }} size="small" className="px-3">
+                                <Button onClick={newFilter} size="small" className="px-3">
                                     Add a filter
                                 </Button>
                                 <div className="flex flex-col gap-2">
                                     {
                                         filters.map(filter => {
                                             return (
-                                                <div className="flex items-center gap-4 w-full">
+                                                <div key={filter.id} className="flex items-center gap-4 w-full">
                                                     <div className="grid grid-cols-5 gap-4 w-full">
                                                         <div className="col-span-2">
-                                                            <Select>
+                                                            <Select onValueChange={setValueFilter}>
                                                                 <Select.Trigger>
                                                                     <Select.Value placeholder="Select a column to filter" />
                                                                 </Select.Trigger>
                                                                 <Select.Content>
                                                                     {columns.current.map((item) => (
-                                                                        <Select.Item key={item.value} value={item.value}>
+                                                                        <Select.Item key={item.value} value={item.value + "---" + filter.id + "---" + "columns"}>
                                                                             {item.label}
                                                                         </Select.Item>
                                                                     ))}
@@ -185,13 +234,13 @@ const ToolBar = (props) => {
                                                             </Select>
                                                         </div>
                                                         <div className="col-span-1">
-                                                            <Select>
+                                                            <Select onValueChange={setValueFilter}>
                                                                 <Select.Trigger>
                                                                     <Select.Value placeholder="Operation" />
                                                                 </Select.Trigger>
                                                                 <Select.Content>
                                                                     {filterOperations.current.map((item) => (
-                                                                        <Select.Item key={item.value} value={item.value}>
+                                                                        <Select.Item key={item.value} value={item.value + "---" + filter.id + "---" + "operation"}>
                                                                             {item.label}
                                                                         </Select.Item>
                                                                     ))}
@@ -199,10 +248,10 @@ const ToolBar = (props) => {
                                                             </Select>
                                                         </div>
                                                         <div className="col-span-2">
-                                                            <Input placeholder="Value to filter"></Input>
+                                                            <input onChange={setInputValueFilter} data-id={filter.id} className="caret-ui-fg-base bg-ui-bg-field hover:bg-ui-bg-field-hover shadow-borders-base placeholder-ui-fg-muted text-ui-fg-base transition-fg relative w-full appearance-none rounded-md outline-none focus-visible:shadow-borders-interactive-with-active disabled:text-ui-fg-disabled disabled:!bg-ui-bg-disabled disabled:placeholder-ui-fg-disabled disabled:cursor-not-allowed aria-[invalid=true]:!shadow-borders-error invalid:!shadow-borders-error [&amp;::--webkit-search-cancel-button]:hidden [&amp;::-webkit-search-cancel-button]:hidden [&amp;::-webkit-search-decoration]:hidden txt-compact-small h-8 px-2 py-1.5" placeholder="Value to filter"></input>
                                                         </div>
                                                     </div>
-                                                    <Button variant="danger" className="p-1">
+                                                    <Button onClick={setDeleteFilter} data-id={filter.id} variant="danger" className="p-1">
                                                         <Trash />
                                                     </Button>
                                                 </div>
