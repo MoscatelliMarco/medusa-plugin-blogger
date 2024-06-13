@@ -1,19 +1,12 @@
 import { RouteConfig } from "@medusajs/admin";
-import {
-    DocumentSeries,
-    ArchiveBox,
-    MagnifyingGlass,
-    Funnel,
-    TrianglesMini,
-} from "@medusajs/icons";
+import { DocumentSeries } from "@medusajs/icons";
 import { ArticleCard } from "../../../ui-components/article_card";
-import { Link } from "react-router-dom";
-import { Button, Container, Input } from "@medusajs/ui";
 import { useEffect, useState } from "react";
 import { useAdminCustomQuery, useAdminCustomDelete, useAdminDeleteFile } from "medusa-react";
 import { createPathRequest } from "../../../javascript/utils";
 import { objectToQueryString } from "../../../javascript/parse_query_params";
 import useTimedState from "../../../javascript/useTimedState";
+import ToolBar from "../../../ui-components/tool_bar";
 
 const ArticlePage = () => {
     const [error, setError] = useState("");
@@ -112,29 +105,7 @@ const ArticlePage = () => {
 
     return (
         <div className="flex flex-col gap-7 items-center break-words relative">
-            <div className="flex justify-between items-center w-full">
-                <Link to="/a/article-editor">
-                    <Button variant="primary">
-                        <ArchiveBox />
-                        New article
-                    </Button>
-                </Link>
-                <div className="flex items-center gap-2">
-                    <Button variant="secondary">
-                        <TrianglesMini />
-                        Sort by
-                    </Button>
-                    <Button variant="secondary">
-                        <Funnel />
-                        Filter
-                    </Button>
-                    <div className="relative">
-                        <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                        {/* <input type="text" className="focus:outline-none border border-gray-300 rounded-md py-1.5 pr-4 pl-10 placeholder-gray-400" placeholder="Search" /> */}
-                        <Input className="bg-white" type="search" />
-                    </div>
-                </div>
-            </div>
+            <ToolBar />
             {
                 (deleteError || deleteSuccess) ?
                 <div className="flex justify-center">
