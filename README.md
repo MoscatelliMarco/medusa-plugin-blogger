@@ -96,6 +96,9 @@ const example_object = {
 console.log(objectToQueryString(example_object))
 ```
 
+Output: `where=%7B%22id%22%3A%2201HZHPGPY4MTR97EVX6FDDEXZE%22%7D&take=7&skip=2&select=%5B%22title%22%2C%22subtitle%22%2C%22body%22%5D&order=%7B%22created_at%22%3A%22ASC%22%7D`
+This output may look strange at first, almost impossible to understand, but the api routes already parse this url properly into the object that will be passed to search the database.
+
 **Find operators**: if you want to use a specific find operator like `Like` or `ILike` you can send an object like this:
 ```json
 {
@@ -109,8 +112,7 @@ console.log(objectToQueryString(example_object))
 ```
 The supported find operators are: `ILike, Like, Raw, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual`, you can find the meaning of this operators in the [official typeorm documentation](https://orkhan.gitbook.io/typeorm/docs/find-options). If no supported find operator is found in the object the value will be searched as it is without throwing any error.
 
-Output: `where=%7B%22id%22%3A%2201HZHPGPY4MTR97EVX6FDDEXZE%22%7D&take=7&skip=2&select=%5B%22title%22%2C%22subtitle%22%2C%22body%22%5D&order=%7B%22created_at%22%3A%22ASC%22%7D`
-This output may look strange at first, almost impossible to understand, but the api routes already parse this url properly into the object that will be passed to search the database.
+In the `where` field if you search for `created_at` and `updated_at` key values, the plugin will automatically try to convert the string values into dates using `new Date(string_value)`, if no date is created than the value searched will be a string, even if it will not give any results because the type of `created_at` and `updated_at` is DATE, be mindful when using these two fields as you'll need to provide a correct date to receive an appropriate result.
 
 See the [Typeorm documentation](https://orkhan.gitbook.io/typeorm/docs/find-options) to understand better what every of this parameters does, keep in mind that the behavior of where is a little bit different from the one in the documentation, there are some things to take into consideration:
 - The search works using an equal condition, for keys where the value is not `id` or `tags`, for example if you want to search for an element that has the title "I like pizza", the query parameters that you'll need to send in the request is `{ where { title: "I like pizza" } }`

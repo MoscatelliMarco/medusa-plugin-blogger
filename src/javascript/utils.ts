@@ -97,6 +97,17 @@ export const convertObjToSearchQuery = (obj) => {
                     const tagsString = `{${obj[key].join(',')}}`;
                     result[key] = Raw(alias => `${alias} @> :tags`, { tags: tagsString });
                 } else if (typeof obj[key] == "object") {
+                    if (key == "created_at" || key == "updated_at") {
+                        const date = new Date(obj[key].value) as any;
+
+                        // If date is NaN return the object as it is
+                        if (isNaN(date)) {
+                            result[key] = obj[key];
+                        } else {
+                            result[key] = date;
+                        }
+                    }
+
                     if (obj[key].find_operator == "ILike") {
                         result[key] = ILike(obj[key].value);
                     } else if (obj[key].find_operator == "Like") {
@@ -111,6 +122,15 @@ export const convertObjToSearchQuery = (obj) => {
                         result[key] = MoreThanOrEqual(obj[key].value);
                     } else {
                         result[key] = obj[key];
+                    }
+                } else if (key == "created_at" || key == "updated_at") {
+                    const date = new Date(obj[key]) as any;
+
+                    // If date is NaN return the object as it is
+                    if (isNaN(date)) {
+                        result[key] = obj[key];
+                    } else {
+                        result[key] = date;
                     }
                 } else {
                     result[key] = obj[key];
