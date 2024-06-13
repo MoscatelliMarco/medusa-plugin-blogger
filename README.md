@@ -96,7 +96,18 @@ const example_object = {
 console.log(objectToQueryString(example_object))
 ```
 
-**NOTE**: Searches in the `where` field for strings are done using the LIKE operator, so be mindful when using `%` or `_` when searching for specific strings, as this can trigger unwanted behavior, you should prevent a strange behavior by escaping these values using `\\`, if you don't know the meaning of `%` and `_` is, [here is an article about it](https://help.sap.com/docs/signavio-process-intelligence/signal-guide/like-and-ilike-expressions). Another parameter that can be added to the query object is `use_ilike` this allows to conduct searches over strings using the ILIKE operator and LIKE.
+**Find operators**: if you want to use a specific find operator like `Like` or `ILike` you can send an object like this:
+```json
+{
+  "where": {
+    "title": {
+      "find_operator": "Like",
+      "value": "%Hello World%"
+    }
+  }
+}
+```
+The supported find operators are: `ILike, Like, Raw, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual`, you can find the meaning of this operators in the [official typeorm documentation](https://orkhan.gitbook.io/typeorm/docs/find-options). If no supported find operator is found in the object the value will be searched as it is without throwing any error.
 
 Output: `where=%7B%22id%22%3A%2201HZHPGPY4MTR97EVX6FDDEXZE%22%7D&take=7&skip=2&select=%5B%22title%22%2C%22subtitle%22%2C%22body%22%5D&order=%7B%22created_at%22%3A%22ASC%22%7D`
 This output may look strange at first, almost impossible to understand, but the api routes already parse this url properly into the object that will be passed to search the database.

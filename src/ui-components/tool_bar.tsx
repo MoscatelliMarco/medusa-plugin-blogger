@@ -119,11 +119,11 @@ const ToolBar = () => {
                 <Container className="flex justify-center">
                     {
                         contentMenu == "filter" ?
-                        <div className="flex flex-col gap-3.5 w-full">
+                        <div className="flex flex-col gap-2.5 w-full">
                             <p className="text-xl font-semibold">
                                 Filter
                             </p>
-                            <div className="flex flex-col gap-3">
+                            <div className="flex flex-col gap-2">
                                 <Button onClick={() => {
                                     setFilters(filters => {
                                         return [
@@ -184,7 +184,7 @@ const ToolBar = () => {
                                 </div>
                             </div>
                         </div> :
-                        <div className="flex flex-col gap-2 w-full">
+                        <div className="flex flex-col gap-2.5 w-full">
                             <p className="text-xl font-semibold">
                                 Sort by
                             </p>

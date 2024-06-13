@@ -6,7 +6,7 @@ Module not found: Error: Can't resolve 'react-native-sqlite-storage'
 
 Which at the time I am writing this comment is not causing any visible problem
 */
-import { ILike, Like, Raw } from "typeorm"
+import { ILike, Like, Raw, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual } from "typeorm"
 
 export const listenChangesSave = (debounceAutoSave) => {
     const title = document.getElementById("title");
@@ -82,7 +82,7 @@ export const removeIdFromCurrentUrl = () => {
 
 export const createPathRequest = (articleId, base_path = "/blog/articles") => articleId ? base_path + "/" + articleId : base_path
 
-export const convertObjToSearchQuery = (obj, use_ilike=false) => {
+export const convertObjToSearchQuery = (obj) => {
     const result = {};
     for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
@@ -91,15 +91,27 @@ export const convertObjToSearchQuery = (obj, use_ilike=false) => {
                     if (key == "id") {
                         result[key] = Like("%" + obj[key].replace(/[%_]/g, '\\$&'));
                     } else {
-                        if (use_ilike) {
-                            result[key] = ILike(obj[key]);
-                        } else {
-                            result[key] = Like(obj[key]);
-                        }
+                        result[key] = obj[key];
                     }
                 } else if (Array.isArray(obj[key]) && key == "tags") { // Only works with the column tags
                     const tagsString = `{${obj[key].join(',')}}`;
                     result[key] = Raw(alias => `${alias} @> :tags`, { tags: tagsString });
+                } else if (typeof obj[key] == "object") {
+                    if (obj[key].find_operator == "ILike") {
+                        result[key] = ILike(obj[key].value);
+                    } else if (obj[key].find_operator == "Like") {
+                        result[key] = Like(obj[key].value);
+                    } else if (obj[key].find_operator == "LessThan") {
+                        result[key] = LessThan(obj[key].value);
+                    } else if (obj[key].find_operator == "LessThanOrEqual") {
+                        result[key] = LessThanOrEqual(obj[key].value);
+                    } else if (obj[key].find_operator == "MoreThan") {
+                        result[key] = MoreThan(obj[key].value);
+                    } else if (obj[key].find_operator == "MoreThanOrEqual") {
+                        result[key] = MoreThanOrEqual(obj[key].value);
+                    } else {
+                        result[key] = obj[key];
+                    }
                 } else {
                     result[key] = obj[key];
                 }

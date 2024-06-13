@@ -19,7 +19,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         const search_query_obj = parseQueryString(req.query) as any;
 
         let filters = MySqlSanitizationObj(search_query_obj.where);
-        filters = convertObjToSearchQuery(filters, search_query_obj.use_ilike);
+        filters = convertObjToSearchQuery(filters);
         search_params["where"] = filters;
 
         const { select, order, skip, take } = search_query_obj;
