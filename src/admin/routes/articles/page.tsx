@@ -62,14 +62,11 @@ const ArticlePage = () => {
             } else if (data?.articles) {
                 setArticles(articles => [...articles, ...data.articles]);
 
-                const current_articles_length = [...articles, ...data.articles].length;
-                // If the article number is the same and the number of articles is not zero show a load more error
-                if (previousNumberArticles.current == current_articles_length && previousNumberArticles.current != 0) {
+                if (!data.articles.length && articles.length) {
                     setArticlesLoadState("There are no more articles left")
                 }
-                previousNumberArticles.current = current_articles_length;
             } else {
-                setError("We couldn't find any articles, this is probably a bug of the plugin, so please file a report");
+                setError("We couldn't find any articles, this is probably a bug of the plugin, please file a report");
             }
         }
     }, [data]);
