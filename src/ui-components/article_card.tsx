@@ -31,7 +31,7 @@ export const ArticleCard = (props) => {
                             <img 
                             src={`${props.article.thumbnail_image}`} 
                             alt="" 
-                            className="object-cover"/>
+                            className="object-cover w-full h-full object-cover object-center"/>
                         ) :
                         (
                             <div className="grid place-items-center h-full text-black/20 font-light text-sm">

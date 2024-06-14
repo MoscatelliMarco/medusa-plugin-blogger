@@ -656,14 +656,18 @@ const ArticleEditorPage = () => {
                                         padding-bottom: 13rem !important; 
                                         min-height: 16rem;
                                     }
+                                    .ce-header {
+                                        padding-top: 0.35em;
+                                        font-weight: 600 !important;
+                                    }
                                     h1 {
-                                        font-size: 2rem;
+                                        font-size: 1.9rem;
                                     }
                                     h2 {
-                                        font-size: 1.5rem;
+                                        font-size: 1.55rem;
                                     }
                                     h3 {
-                                        font-size: 1.17rem;
+                                        font-size: 1.2rem;
                                     }
                                     h4 {
                                         font-size: 1rem;

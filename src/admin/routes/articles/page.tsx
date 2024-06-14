@@ -154,7 +154,7 @@ const ArticlePage = () => {
     }
 
     return (
-        <div className="flex flex-col gap-7 items-center break-words relative mb-12">
+        <div className="flex flex-col gap-5 items-center break-words relative mb-12">
             <ToolBar setFiltersSort={setFiltersSort}/>
             {
                 (deleteError || deleteSuccess) ?
@@ -200,7 +200,7 @@ const ArticlePage = () => {
                 )
             }
             {
-                !isLoading ? 
+                !isLoading && articles.length ? 
                 <div>
                     <Button onClick={loadMoreArticles}>
                         Load more

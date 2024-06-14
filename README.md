@@ -2,7 +2,7 @@
   <p align="center">
     <img alt="Medusa" src="https://i.imgur.com/1JHWUTL.png" width="200" />
   </p>
-<h1>Medusa Plugin Blog</h1>
+<h1>Medusa Plugin Blogger</h1>
 <p>A blog integration for medusa</p>
 </div>
 
@@ -10,8 +10,7 @@
 1. [Introduction](#introduction)
 2. [Getting started](#getting-started)
 3. [API endpoints](#api-endpoints)
-4. [UI guide](#ui-guide)
-5. [Architecture overview](#architecture-overview)
+4. [Architecture overview](#architecture-overview)
 
 ---
 
@@ -19,10 +18,15 @@
 
 A blog integration for your MedusaJS admin page, enabling you to create and manage blog articles directly from the admin interface. This plugin extends the capabilities of MedusaJS, a powerful headless commerce platform, by adding a dedicated blogging feature. With this integration, store administrators can effortlessly create, edit, and publish blog posts to enhance their content marketing strategy, engage customers, and improve SEO.
 
-The Medusa-Plugin-Blog is designed to provide a seamless user experience, utilizing modern tools and libraries for rich text editing and tag management. By incorporating this plugin into your MedusaJS setup, you can maintain a cohesive content and commerce environment, streamlining your workflow and ensuring consistency across your brand's digital presence.
+The Medusa-Plugin-Blogger is designed to provide a seamless user experience, utilizing modern tools and libraries for rich text editing and tag management. By incorporating this plugin into your MedusaJS setup, you can maintain a cohesive content and commerce environment, streamlining your workflow and ensuring consistency across your brand's digital presence.
 
-TODO add image of blog articles page and post article page
-
+<div style="display: flex; gap: 1rem;">
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+    <img src="https://i.imgur.com/nkzF2EE.png" alt="all articles page" style="width: 100%; max-height: 50vh; object-fit: contain;" />
+    <img src="https://imgur.com/IKmJBsy.png" alt="upload options" style="width: 100%; max-height: 50vh; object-fit: contain;" />
+  </div>
+  <img src="https://imgur.com/tUku0si.png" alt="article editor" style="width: 40%; max-height: 100vh; object-fit: contain;" />
+</div>
 
 # Getting started  
 
@@ -31,7 +35,7 @@ TODO add image of blog articles page and post article page
 Run the following command in the directory of the Medusa backend:
 
 ```bash
-yarn add medusa-plugin-blog
+yarn add medusa-plugin-blogger
 ```
 
 ### Add to medusa-config.js
@@ -42,7 +46,7 @@ In `medusa-config.js` add the following to the `plugins` array:
 const  plugins = {
   	///...other plugins
   	{
-		resolve: 'medusa-plugin-blog',
+		resolve: 'medusa-plugin-blogger',
 		options: {
 			enableUI: true,
 		},
@@ -57,6 +61,10 @@ Run the following command from the root of the project to udpate database with a
 ```bash
 npx medusa migrations run
 ```
+
+### Required dependencies
+
+A file service is required for this plugin to work.
   
 # API endpoints
 
@@ -148,19 +156,13 @@ Modify an already existing blog article, this route requires the new `BlogArticl
 #### ```DELETE /admin/blog/articles/:id```
 
 Delete an article having the id in the url.
- 
-# UI Guide
-
-TODO add images of all pages and explaining what they do
-
-**NOTE**: There are no mandatory fields, as your use of the fields depends on your frontend implementation
 
 # Architecture overview
 
 
 ## Dependencies
 
-Medusa-Plugin-Blog relies on several key dependencies to provide a rich user experience and robust functionality:
+Medusa-Plugin-Blogger relies on several key dependencies to provide a rich user experience and robust functionality:
 
 -   **Editor.js**: A block-styled editor that allows for rich text content creation. Editor.js is highly modular and extensible, and the plugin leverages several Editor.js tools including:
 -   **React Dropzone**: A simple React component for creating file upload zones. This is used in the blog plugin to facilitate image and file uploads directly within the admin interface.
@@ -229,7 +231,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## A special thank to
 
 ### Stargazers
-[![Stargazers repo roster for @MoscatelliMarco/medusa-plugin-blog](https://reporoster.com/stars/MoscatelliMarco/medusa-plugin-blog)](https://github.com/MoscatelliMarco/medusa-plugin-blog/stargazers)
+[![Stargazers repo roster for @MoscatelliMarco/medusa-plugin-blogger](https://reporoster.com/stars/MoscatelliMarco/medusa-plugin-blogger)](https://github.com/MoscatelliMarco/medusa-plugin-blogger/stargazers)
 
 ### Forkers
-[![Forkers repo roster for @MoscatelliMarco/medusa-plugin-blog](https://reporoster.com/forks/MoscatelliMarco/medusa-plugin-blog)](https://github.com/MoscatelliMarco/medusa-plugin-blog/network/members)
+[![Forkers repo roster for @MoscatelliMarco/medusa-plugin-blogger](https://reporoster.com/forks/MoscatelliMarco/medusa-plugin-blogger)](https://github.com/MoscatelliMarco/medusa-plugin-blogger/network/members)
