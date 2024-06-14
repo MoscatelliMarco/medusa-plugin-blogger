@@ -175,7 +175,7 @@ const ArticlePage = () => {
                 ""
             }
             {
-                isLoading ?
+                isLoading && !articles.length ?
                     (<p className="text-center max-w-sm mt-4 font-medium">Loading...</p>)
                 :
                 (
