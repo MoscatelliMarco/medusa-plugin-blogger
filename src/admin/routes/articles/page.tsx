@@ -52,7 +52,6 @@ const ArticlePage = () => {
 
     useEffect(() => {
         if (data) {
-            console.log(data)
             if (data?.error) {
                 if (previousNumberArticles.current == 0) {
                     setError(data.error);

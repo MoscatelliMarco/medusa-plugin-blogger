@@ -517,7 +517,6 @@ const ArticleEditorPage = () => {
 
         // Delete images if they are not inside the body or thumbnail anymore
         if (upload_images) {
-            console.log(imagesCache.current)
             for (let image of imagesCache.current) {
                 if (!alreadyUploadedImages.includes(image)) {
                     const file_key = image.split('/').slice(-1)[0];

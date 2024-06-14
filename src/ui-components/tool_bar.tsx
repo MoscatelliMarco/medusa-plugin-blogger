@@ -190,10 +190,6 @@ const ToolBar = (props) => {
             }
         }
         props.setFiltersSort(filters_sort => {
-            console.log({
-                ...filters_sort,
-                where: where_object
-            })
             return {
                 ...filters_sort,
                 where: where_object
