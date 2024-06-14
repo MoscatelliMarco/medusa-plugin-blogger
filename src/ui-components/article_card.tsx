@@ -8,7 +8,7 @@ export const ArticleCard = (props) => {
         <Container className="container p-2 rounded-md min-h-72 relative h-full">
             {
                 showConfirmationDelete ?
-                <div onClick={() => {setShowConfirmationDelete(false);}} className="absolute z-20 top-0 left-0 w-full h-full backdrop-blur-md flex flex-col gap-0.5 items-center text-center justify-center">
+                <div onClick={() => {setShowConfirmationDelete(false);}} className="absolute z-20 top-0 left-0 w-full h-full backdrop-blur flex flex-col gap-0.5 items-center text-center justify-center">
                     <p className="font-medium w-60 text-lg">
                         Are you sure you want to delete this article?
                     </p>

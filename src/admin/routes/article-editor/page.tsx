@@ -29,7 +29,7 @@ const ArticleEditorPage = () => {
     const [submitSuccess, setSubmitSuccess] = useTimedState("", 5000);
     const [statusSaved, setStatusSaved] = useState("Not saved");
     const [statusSavedError, setStatusSavedError] = useState(false);
-    const [draftStatus, setDraftStatus] = useTimedState(true, 5000);
+    const [draftStatus, setDraftStatus] = useState(true);
     const [isIdValid, setIsIdValid] = useState(true);
     const [inputs, setInputs] = useState({
         title: "",
@@ -65,6 +65,7 @@ const ArticleEditorPage = () => {
             if (!isLoading) {
                 if (data.article) {
                     loadArticle(data.article);
+                    setDraftStatus(data.article.draft);
                     setLoadedBody(data.article.body);
                     setLoadedThumbnailImage(data.article.thumbnail_image);
 
@@ -333,9 +334,6 @@ const ArticleEditorPage = () => {
         const dateSaved = new Date();
         setStatusSaved(`Saved at ${formatDateManually(dateSaved)}`);
         setStatusSavedError(false);
-
-        // If the blog is created I want the submit button to become as it would be with the draft upload and reset the page
-        setDraftStatus(true);
     }
     const errorAutoSave = () => {
         setStatusSaved("Unable to save, try again later");
@@ -362,7 +360,7 @@ const ArticleEditorPage = () => {
             mutatePost({...articleContent}, {onSuccess: successAutoSave, onError: errorAutoSave});
         } else {
             // Delete element
-            mutateDelete({}, {onSuccess: successAutoSave, onError: errorAutoSave})
+            mutateDelete(null, {onSuccess: successAutoSave, onError: errorAutoSave})
         }
     }
 
@@ -396,7 +394,6 @@ const ArticleEditorPage = () => {
             }
         );
     }
-
     const uploadFile = useAdminUploadFile();
     const deleteFile = useAdminDeleteFile();
     const [selectedFile, setSelectedFile] = useState<string | null>(null); // For thumbnail image
@@ -594,9 +591,12 @@ const ArticleEditorPage = () => {
                                     inputs={inputs}
                                     handleChangeDraft={handleChangeDraft}
                                     submitError={submitError}
+                                    setSubmitError={setSubmitError}
                                     submitSuccess={submitSuccess}
                                     draftStatus={draftStatus}
                                     setDraftStatus={setDraftStatus}
+                                    articleId={articleId}
+                                    getContent={getContent}
                                 />
                             </div>
 

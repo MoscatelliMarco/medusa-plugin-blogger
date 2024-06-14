@@ -133,9 +133,9 @@ const ArticlePage = () => {
             setDeleteSuccess("");
             return setDeleteError("One or more images inside the article could not be deleted")
         }
-
+        
         mutateDelete(
-            {}, {
+            null, {
                 onSuccess: successDelete, 
                 onError: errorDelete
             }
