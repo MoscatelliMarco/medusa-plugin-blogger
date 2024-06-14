@@ -60,6 +60,8 @@ npx medusa migrations run
   
 # API endpoints
 
+The max size of the body that an endpoint can receive is `10000000B` which is the equivalent to `10MB`, enough to store tens of academic papers inside an article object. This is enought to store approximately **1.600.000 words** In case you go over this threshold with your article, you will not be able to save it.
+
 ## Store endpoints
 
 ```GET /store/blog/articles```
