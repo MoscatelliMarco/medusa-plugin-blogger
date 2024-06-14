@@ -83,61 +83,163 @@ export const removeIdFromCurrentUrl = () => {
 export const createPathRequest = (articleId, base_path = "/blog/articles") => articleId ? base_path + "/" + articleId : base_path
 
 export const convertObjToSearchQuery = (obj) => {
-    const result = {};
-    for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            if (obj[key]) {
-                if (typeof obj[key] == "string") {
-                    if (key == "id") {
-                        result[key] = Like("%" + obj[key].replace(/[%_]/g, '\\$&'));
-                    } else {
-                        result[key] = obj[key];
-                    }
-                } else if (Array.isArray(obj[key]) && key == "tags") { // Only works with the column tags
-                    const tagsString = `{${obj[key].join(',')}}`;
-                    result[key] = Raw(alias => `${alias} @> :tags`, { tags: tagsString });
-                } else if (typeof obj[key] == "object") {
-                    if (key == "created_at" || key == "updated_at") {
-                        const date = new Date(obj[key].value) as any;
+    let result;
 
+    if (Array.isArray(obj)) {
+        result = [];
+        for (const element of obj) {
+            const [key, value] = Object.entries(element)[0] as any;
+            if (typeof value == "string") {
+                if (key == "id") {
+                    result.push({
+                        [key]: Like("%" + value.replace(/[%_]/g, '\\$&'))
+                    })
+                } else if (key == "created_at" || key == "updated_at") {
+                    const date = new Date(value) as any;
+
+                    // If date is NaN return the object as it is
+                    if (isNaN(date)) {
+                        result.push({
+                            [key]: value
+                        })
+                    } else {
+                        result.push({
+                            [key]: date
+                        })
+                    }
+                }  else {
+                    result.push({
+                        [key]: value
+                    })
+                }
+            } else if (Array.isArray(value) && key == "tags") { // Only works with the column tags
+                const tagsString = `{${value.join(',')}}`;
+                result[key] = Raw(alias => `${alias} @> :tags`, { tags: tagsString });
+            } else if (typeof value == "object") {
+                let value_to_convert = value?.value;
+                if (key == "created_at" || key == "updated_at") {
+                    const date = new Date(value_to_convert) as any;
+
+                    // If date is NaN return the object as it is
+                    if (!isNaN(date)) {
+                        value_to_convert = date;
+                    }
+                }
+
+                if (value.find_operator == "ILike") {
+                    result.push({
+                        [key]: ILike(value_to_convert)
+                    })
+                } else if (value.find_operator == "Like") {
+                    result.push({
+                        [key]: Like(value_to_convert)
+                    })
+                } else if (value.find_operator == "LessThan") {
+                    result.push({
+                            [key]: LessThan(value_to_convert)
+                        })
+                } else if (value.find_operator == "LessThanOrEqual") {
+                    result.push({
+                            [key]: LessThanOrEqual(value_to_convert)
+                        })
+                } else if (value.find_operator == "MoreThan") {
+                    result.push({
+                            [key]: MoreThan(value_to_convert)
+                        })
+                } else if (value.find_operator == "MoreThanOrEqual") {
+                    result.push({
+                            [key]: MoreThanOrEqual(value_to_convert)
+                        })
+                } else {
+                    result.push({
+                        [key]: value_to_convert
+                    })
+                }
+            } else if (key == "created_at" || key == "updated_at") {
+                const date = new Date(value) as any;
+
+                // If date is NaN return the object as it is
+                if (isNaN(date)) {
+                    result.push({
+                        [key]: value
+                    })
+                } else {
+                    result.push({
+                        [key]: date
+                    })
+                }
+            } else {
+                result.push({
+                    [key]: value
+                })
+            }
+        }
+    } else {
+        result = {};
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                if (obj[key]) {
+                    if (typeof obj[key] == "string") {
+                        if (key == "id") {
+                            result[key] = Like("%" + obj[key].replace(/[%_]/g, '\\$&'));
+                        } else if (key == "created_at" || key == "updated_at") {
+                            const date = new Date(obj[key]) as any;
+    
+                            // If date is NaN return the object as it is
+                            if (isNaN(date)) {
+                                result[key] = obj[key];
+                            } else {
+                                result[key] = date;
+                            }
+                        } else {
+                            result[key] = obj[key];
+                        }
+                    } else if (Array.isArray(obj[key]) && key == "tags") { // Only works with the column tags
+                        const tagsString = `{${obj[key].join(',')}}`;
+                        result[key] = Raw(alias => `${alias} @> :tags`, { tags: tagsString });
+                    } else if (typeof obj[key] == "object") {
+                        let value_to_convert = obj[key]?.value;
+                        if (key == "created_at" || key == "updated_at") {
+                            const date = new Date(value_to_convert) as any;
+    
+                            // If date is NaN return the object as it is
+                            if (!isNaN(date)) {
+                                value_to_convert = date;
+                            }
+                        }
+    
+                        if (obj[key].find_operator == "ILike") {
+                            result[key] = ILike(value_to_convert);
+                        } else if (obj[key].find_operator == "Like") {
+                            result[key] = Like(value_to_convert);
+                        } else if (obj[key].find_operator == "LessThan") {
+                            result[key] = LessThan(value_to_convert);
+                        } else if (obj[key].find_operator == "LessThanOrEqual") {
+                            result[key] = LessThanOrEqual(value_to_convert);
+                        } else if (obj[key].find_operator == "MoreThan") {
+                            result[key] = MoreThan(value_to_convert);
+                        } else if (obj[key].find_operator == "MoreThanOrEqual") {
+                            result[key] = MoreThanOrEqual(value_to_convert);
+                        } else {
+                            result[key] = value_to_convert;
+                        }
+                    } else if (key == "created_at" || key == "updated_at") {
+                        const date = new Date(obj[key]) as any;
+    
                         // If date is NaN return the object as it is
                         if (isNaN(date)) {
                             result[key] = obj[key];
                         } else {
                             result[key] = date;
                         }
-                    }
-
-                    if (obj[key].find_operator == "ILike") {
-                        result[key] = ILike(obj[key].value);
-                    } else if (obj[key].find_operator == "Like") {
-                        result[key] = Like(obj[key].value);
-                    } else if (obj[key].find_operator == "LessThan") {
-                        result[key] = LessThan(obj[key].value);
-                    } else if (obj[key].find_operator == "LessThanOrEqual") {
-                        result[key] = LessThanOrEqual(obj[key].value);
-                    } else if (obj[key].find_operator == "MoreThan") {
-                        result[key] = MoreThan(obj[key].value);
-                    } else if (obj[key].find_operator == "MoreThanOrEqual") {
-                        result[key] = MoreThanOrEqual(obj[key].value);
                     } else {
                         result[key] = obj[key];
                     }
-                } else if (key == "created_at" || key == "updated_at") {
-                    const date = new Date(obj[key]) as any;
-
-                    // If date is NaN return the object as it is
-                    if (isNaN(date)) {
-                        result[key] = obj[key];
-                    } else {
-                        result[key] = date;
-                    }
-                } else {
-                    result[key] = obj[key];
                 }
             }
         }
     }
+
     return result;
 }
 
@@ -145,4 +247,4 @@ export const mergeUniqueArrays = <T>(array1: T[], array2: T[]): T[] => {
     const combinedArray = [...array1, ...array2];
     const uniqueArray = Array.from(new Set(combinedArray));
     return uniqueArray;
-  };
+};

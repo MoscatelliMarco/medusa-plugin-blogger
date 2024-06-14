@@ -4,7 +4,7 @@ import type {
 } from "@medusajs/medusa";
 import { BlogArticle } from "../../../../models/blog_article";
 import { EntityManager } from "typeorm";
-import { MySqlSanitizationObj } from "../../../../javascript/mysql_sanitization";
+import { SqlSanitizationObj } from "../../../../javascript/sql_sanitization";
 import { convertObjToSearchQuery } from "../../../../javascript/utils";
 import { parseQueryString } from "../../../../javascript/parse_query_params";
 
@@ -18,7 +18,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         
         const search_query_obj = parseQueryString(req.query) as any;
 
-        let filters = MySqlSanitizationObj(search_query_obj.where);
+        let filters = SqlSanitizationObj(search_query_obj.where);
         filters = convertObjToSearchQuery(filters);
         search_params["where"] = filters;
 

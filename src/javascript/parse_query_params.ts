@@ -1,6 +1,6 @@
 export const parseQueryString = (queryString) => {
     const params = new URLSearchParams(queryString);
-    const result = {};
+    let result = {};
 
     function setNestedObject(obj, keys, value) {
         const key = keys.shift();
@@ -32,7 +32,35 @@ export const parseQueryString = (queryString) => {
         setNestedObject(result, keys, parsedValue);
     }
 
+    // If the element was an array an so the keys are 0, 1, 2, 3, 4, 5, transform it into an array
+    result = objectToList(result);
+
     return result;
+}
+
+function objectToList(obj) {
+    const keys = Object.keys(obj);
+    
+    let is_list = true;
+    let supposed_next_value = 0;
+    for (let key of keys) {
+        if (parseInt(key) == supposed_next_value) {
+            supposed_next_value += 1;
+        } else{
+            is_list = false;
+            break;
+        }
+    }
+    
+    if (!is_list) {
+        return obj;
+    }
+    
+    let list_result = [];
+    for (let key of keys) {
+        list_result.push(obj[key]);
+    }
+    return list_result;
 }
 
 export const objectToQueryString = (obj) => {

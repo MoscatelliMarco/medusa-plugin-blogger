@@ -1,4 +1,4 @@
-export const MySqlSanitization = (value) => {
+export const SqlSanitization = (value) => {
     if (typeof value === 'string') {
         return value.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, char => {
             switch (char) {
@@ -18,12 +18,20 @@ export const MySqlSanitization = (value) => {
     return value; // For non-string values, return as is
 };
 
-export const MySqlSanitizationObj = (obj) => {
-    const sanitizedObj = {};
-    for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            sanitizedObj[key] = MySqlSanitization(obj[key]);
+export const SqlSanitizationObj = (obj) => {
+    let sanitized;
+    if (Array.isArray(obj)) {
+        sanitized = [];
+        for (const key of obj) {
+            sanitized.push(SqlSanitization(key));
+        }
+    } else {
+        sanitized = {};
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                sanitized[key] = SqlSanitization(obj[key]);
+            }
         }
     }
-    return sanitizedObj;
+    return sanitized;
 };

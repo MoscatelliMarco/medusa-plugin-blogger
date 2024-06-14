@@ -4,7 +4,7 @@ import type {
 } from "@medusajs/medusa";
 import { BlogArticle } from "../../../../../models/blog_article";
 import { EntityManager } from "typeorm";
-import { MySqlSanitization } from "../../../../../javascript/mysql_sanitization";
+import { SqlSanitization } from "../../../../../javascript/sql_sanitization";
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
@@ -14,7 +14,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         let anyreq = req as any; // Needed to not receive type errors
         const id = anyreq.params.id;
         let article = await articleRepo.findOneBy({
-            id: MySqlSanitization(id).includes("blog_article_") ? MySqlSanitization(id) : "blog_article_" + MySqlSanitization(id)
+            id: SqlSanitization(id).includes("blog_article_") ? SqlSanitization(id) : "blog_article_" + SqlSanitization(id)
         });
 
         return res.json({
@@ -34,7 +34,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         let anyreq = req as any; // Needed to not receive type errors
         const id = anyreq.params.id;
         let article = await articleRepo.findOneBy({
-            id: MySqlSanitization(id).includes("blog_article_") ? MySqlSanitization(id) : "blog_article_" + MySqlSanitization(id)
+            id: SqlSanitization(id).includes("blog_article_") ? SqlSanitization(id) : "blog_article_" + SqlSanitization(id)
         });
 
         if (!article) {
@@ -79,7 +79,7 @@ export const DELETE = async (req: MedusaRequest, res: MedusaResponse) => {
         let anyreq = req as any; // Needed to not receive type errors
         const id = anyreq.params.id;
         let article = await articleRepo.delete({
-            id: MySqlSanitization(id).includes("blog_article_") ? MySqlSanitization(id) : "blog_article_" + MySqlSanitization(id)
+            id: SqlSanitization(id).includes("blog_article_") ? SqlSanitization(id) : "blog_article_" + SqlSanitization(id)
         });
 
         return res.json({

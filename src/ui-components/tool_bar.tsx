@@ -53,6 +53,14 @@ const ToolBar = (props) => {
             "value": "subtitle"
         },
         {
+            "label": "Created at",
+            "value": "created_at"
+        },
+        {
+            "label": "Updated at",
+            "value": "updated_at"
+        },
+        {
             "label": "Draft",
             "value": "draft"
         }

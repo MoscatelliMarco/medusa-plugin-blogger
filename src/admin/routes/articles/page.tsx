@@ -11,7 +11,7 @@ import ToolBar from "../../../ui-components/tool_bar";
 
 const ArticlePage = () => {
     // Error loading the initial page
-    const [error, setError] = useState("");
+    const [error, setError] = useState<string | null>(null);
 
     // Keep track of articles loadings
     const [ articlesCount, setArticlesCount ] = useState({
@@ -52,14 +52,17 @@ const ArticlePage = () => {
 
     useEffect(() => {
         if (data) {
+            console.log(data)
             if (data?.error) {
                 if (previousNumberArticles.current == 0) {
                     setError(data.error);
                 } else {
+                    setError(null);
                     // If it is not the first load don't show a full page error
                     setArticlesLoadState("Unable to load more articles: " + data.error)
                 }
             } else if (data?.articles) {
+                setError(null);
                 setArticles(articles => [...articles, ...data.articles]);
 
                 if (!data.articles.length && articles.length) {
