@@ -20,12 +20,8 @@ A blog integration for your MedusaJS admin page, enabling you to create and mana
 
 The Medusa-Plugin-Blogger is designed to provide a seamless user experience, utilizing modern tools and libraries for rich text editing and tag management. By incorporating this plugin into your MedusaJS setup, you can maintain a cohesive content and commerce environment, streamlining your workflow and ensuring consistency across your brand's digital presence.
 
-<div style="display: flex; gap: 1rem;">
-  <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
-    <img src="https://i.imgur.com/nkzF2EE.png" alt="all articles page" style="width: 100%; max-height: 50vh; object-fit: contain;" />
-    <img src="https://imgur.com/IKmJBsy.png" alt="upload options" style="width: 100%; max-height: 50vh; object-fit: contain;" />
-  </div>
-  <img src="https://imgur.com/tUku0si.png" alt="article editor" style="width: 40%; max-height: 100vh; object-fit: contain;" />
+<div align="center">
+  <img src="https://imgur.com/JAfYqeL.png" alt="medusa-plugin-blogger rapresentation" />
 </div>
 
 # Getting started  
