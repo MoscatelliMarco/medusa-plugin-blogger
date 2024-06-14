@@ -15,7 +15,7 @@ const ArticlePage = () => {
 
     // Keep track of articles loadings
     const [ articlesCount, setArticlesCount ] = useState({
-        take: 3,
+        take: 12,
         skip: 0
     });
     const [ filtersSort, setFiltersSort ] = useState({});
@@ -96,18 +96,20 @@ const ArticlePage = () => {
         const uploadPromises = [];
         if (article.body_images) {
             for (let image of article.body_images) {
-                let file_key = image.split('/').slice(-1)[0];
-                const uploadPromise = new Promise(async (resolve, reject) => {
-                    deleteFile.mutate({ file_key: file_key }, {
-                        onSuccess: () => {
-                            resolve(undefined);
-                        },
-                        onError: () => {
-                            reject();
-                        }
+                if (image) {
+                    let file_key = image.split('/').slice(-1)[0];
+                    const uploadPromise = new Promise(async (resolve, reject) => {
+                        deleteFile.mutate({ file_key: file_key }, {
+                            onSuccess: () => {
+                                resolve(undefined);
+                            },
+                            onError: () => {
+                                reject();
+                            }
+                        })
                     })
-                })
-                uploadPromises.push(uploadPromise);
+                    uploadPromises.push(uploadPromise);
+                }
             }
         }
         if (article.thumbnail_image) {

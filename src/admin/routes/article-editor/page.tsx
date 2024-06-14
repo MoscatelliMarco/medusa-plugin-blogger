@@ -107,7 +107,7 @@ const ArticleEditorPage = () => {
     let timeoutId;
     function debounceAutoSave() {
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(autoSave, 2000);
+        timeoutId = setTimeout(autoSave, 1500);
     }
 
     // Run debounce auto save when thumbnail image change, create state for the image url of the file
