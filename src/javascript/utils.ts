@@ -6,7 +6,7 @@ Module not found: Error: Can't resolve 'react-native-sqlite-storage'
 
 Which at the time I am writing this comment is not causing any visible problem
 */
-import { ILike, Like, Raw, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual } from "typeorm"
+import { ILike, Like, Raw, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, And } from "typeorm";
 
 export const listenChangesSave = (debounceAutoSave) => {
     const title = document.getElementById("title");
@@ -155,19 +155,6 @@ export const convertObjToSearchQuery = (obj) => {
                         [key]: value_to_convert
                     })
                 }
-            } else if (key == "created_at" || key == "updated_at") {
-                const date = new Date(value) as any;
-
-                // If date is NaN return the object as it is
-                if (isNaN(date)) {
-                    result.push({
-                        [key]: value
-                    })
-                } else {
-                    result.push({
-                        [key]: date
-                    })
-                }
             } else {
                 result.push({
                     [key]: value
@@ -179,61 +166,66 @@ export const convertObjToSearchQuery = (obj) => {
         for (const key in obj) {
             if (obj.hasOwnProperty(key)) {
                 if (obj[key]) {
-                    if (typeof obj[key] == "string") {
-                        if (key == "id") {
-                            result[key] = Like("%" + obj[key].replace(/[%_]/g, '\\$&'));
-                        } else if (key == "created_at" || key == "updated_at") {
-                            const date = new Date(obj[key]) as any;
-    
-                            // If date is NaN return the object as it is
-                            if (isNaN(date)) {
-                                result[key] = obj[key];
+                    let object_value_to_analyse = obj[key];
+                    if (!Array.isArray(object_value_to_analyse)) {
+                        object_value_to_analyse = [object_value_to_analyse];
+                    }
+
+                    const current_result_key_values = [];
+                    for (let value of object_value_to_analyse) {
+                        if (typeof value == "string") {
+                            if (key == "id") {
+                                current_result_key_values.push(Like("%" + value.replace(/[%_]/g, '\\$&')));
+                            } else if (key == "created_at" || key == "updated_at") {
+                                const date = new Date(value) as any;
+        
+                                // If date is NaN return the object as it is
+                                if (isNaN(date)) {
+                                    current_result_key_values.push(value);
+                                } else {
+                                    current_result_key_values.push(date);
+                                }
                             } else {
-                                result[key] = date;
+                                current_result_key_values.push(value);
                             }
-                        } else {
-                            result[key] = obj[key];
-                        }
-                    } else if (Array.isArray(obj[key]) && key == "tags") { // Only works with the column tags
-                        const tagsString = `{${obj[key].join(',')}}`;
-                        result[key] = Raw(alias => `${alias} @> :tags`, { tags: tagsString });
-                    } else if (typeof obj[key] == "object") {
-                        let value_to_convert = obj[key]?.value;
-                        if (key == "created_at" || key == "updated_at") {
-                            const date = new Date(value_to_convert) as any;
-    
-                            // If date is NaN return the object as it is
-                            if (!isNaN(date)) {
-                                value_to_convert = date;
+                        } else if (Array.isArray(value) && key == "tags") { // Only works with the column tags
+                            const tagsString = `{${value.join(',')}}`;
+                            current_result_key_values.push(Raw(alias => `${alias} @> :tags`, { tags: tagsString }));
+                        } else if (typeof value == "object") {
+                            let final_value = value?.value;
+                            if (key == "created_at" || key == "updated_at") {
+                                const date = new Date(final_value) as any;
+        
+                                // If date is NaN return the object as it is
+                                if (!isNaN(date)) {
+                                    final_value = date;
+                                }
                             }
-                        }
-    
-                        if (obj[key].find_operator == "ILike") {
-                            result[key] = ILike(value_to_convert);
-                        } else if (obj[key].find_operator == "Like") {
-                            result[key] = Like(value_to_convert);
-                        } else if (obj[key].find_operator == "LessThan") {
-                            result[key] = LessThan(value_to_convert);
-                        } else if (obj[key].find_operator == "LessThanOrEqual") {
-                            result[key] = LessThanOrEqual(value_to_convert);
-                        } else if (obj[key].find_operator == "MoreThan") {
-                            result[key] = MoreThan(value_to_convert);
-                        } else if (obj[key].find_operator == "MoreThanOrEqual") {
-                            result[key] = MoreThanOrEqual(value_to_convert);
+        
+                            if (value?.find_operator == "ILike") {
+                                final_value = ILike(final_value);
+                            } else if (value?.find_operator == "Like") {
+                                final_value = Like(final_value);
+                            } else if (value?.find_operator == "LessThan") {
+                                final_value = LessThan(final_value);
+                            } else if (value?.find_operator == "LessThanOrEqual") {
+                                final_value = LessThanOrEqual(final_value);
+                            } else if (value?.find_operator == "MoreThan") {
+                                final_value = MoreThan(final_value);
+                            } else if (value?.find_operator == "MoreThanOrEqual") {
+                                final_value = MoreThanOrEqual(final_value);
+                            }
+                                
+                            current_result_key_values.push(final_value);
                         } else {
-                            result[key] = value_to_convert;
+                            current_result_key_values.push(value);
                         }
-                    } else if (key == "created_at" || key == "updated_at") {
-                        const date = new Date(obj[key]) as any;
-    
-                        // If date is NaN return the object as it is
-                        if (isNaN(date)) {
-                            result[key] = obj[key];
-                        } else {
-                            result[key] = date;
-                        }
+                    }
+                    
+                    if (current_result_key_values.length > 1) {
+                        result[key] = And(...current_result_key_values)
                     } else {
-                        result[key] = obj[key];
+                        result[key] = current_result_key_values[0];
                     }
                 }
             }

@@ -163,13 +163,29 @@ const ToolBar = (props) => {
 
         for (let filter of filters) {
             if (filter.field && filter.operation && filter.value) {
+                let value_to_add;
                 if (filter.operation != "Equal") {
-                    where_object[filter.field] = {
+                    value_to_add = {
                         find_operator: filter.operation,
                         value: filter.value
                     }
                 } else {
-                    where_object[filter.field] = filter.value;
+                    value_to_add = filter.value;
+                }
+                if (where_object[filter.field]) {
+                    if (Array.isArray(where_object[filter.field])) {
+                        where_object[filter.field] = [
+                            ...where_object[filter.field], 
+                            value_to_add
+                        ]
+                    } else {
+                        where_object[filter.field] = [
+                            where_object[filter.field], 
+                            value_to_add
+                        ]
+                    }
+                } else {
+                    where_object[filter.field] = value_to_add;
                 }
             }
         }
