@@ -130,6 +130,8 @@ Returns a json object of all the articles respecting the conditions passed as qu
 
 Create a new blog article.
 
+**NOTE**: No server validation is done to check if the `url-slug` value is a valid url as this is already done in the frontend and it is assumed that the admin would not do anything to harm its store.
+
 #### ```GET /admin/blog/articles/:id```
 
 Return a json object of the article having the id in the url.
