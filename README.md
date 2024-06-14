@@ -121,6 +121,9 @@ See the [Typeorm documentation](https://orkhan.gitbook.io/typeorm/docs/find-opti
 - IDs can be fetched with these two formats `blog_article_01HZHPGPY4MTR97EVX6FDDEXZE` and `01HZHPGPY4MTR97EVX6FDDEXZE`, both versions are valid
 - When adding a `tags` key to the body, they must be an array and the database will be searched for an element that has at least all the tags inside the `tags` value in the query parameters
 - We do not yet support searches over the body of the article
+- If you want an OR condition in your `where` value you need a list where you need to put all the separate conditions like this `[ {"title" : "Hello World!", "subtitle": "Awesome article"}, {"title" : "Example", "subtitle": "Awesome example"} ]`
+- If you want an AND condition in your `where` value for a specific field, you need to list all the conditions for that key, let's say you want a date range you can do it like this `{ "created_at": [{"find_operator": "LessThan","value": "2024-06-14"},{"find_operator": "MoreThanOrEqual","value": "2024-06-12"}]}`
+- The body is sanitised automaticcaly from SQL injections
 
 ## Admin endpoints
 
