@@ -88,78 +88,145 @@ export const convertObjToSearchQuery = (obj) => {
     if (Array.isArray(obj)) {
         result = [];
         for (const element of obj) {
-            const [key, value] = Object.entries(element)[0] as any;
-            if (typeof value == "string") {
-                if (key == "id") {
-                    result.push({
-                        [key]: Like("%" + value.replace(/[%_]/g, '\\$&'))
-                    })
-                } else if (key == "created_at" || key == "updated_at") {
-                    const date = new Date(value) as any;
+            const [key, value_el] = Object.entries(element)[0] as any;
 
-                    // If date is NaN return the object as it is
-                    if (isNaN(date)) {
-                        result.push({
-                            [key]: value
-                        })
+            let object_value_to_analyse = value_el;
+            if (!Array.isArray(object_value_to_analyse)) {
+                object_value_to_analyse = [object_value_to_analyse];
+            }
+
+            const current_result_key_values = [];
+            for (let value of object_value_to_analyse) {
+                if (typeof value == "string") {
+                    if (key == "id") {
+                        current_result_key_values.push(Like("%" + value.replace(/[%_]/g, '\\$&')));
+                    } else if (key == "created_at" || key == "updated_at") {
+                        const date = new Date(value) as any;
+
+                        // If date is NaN return the object as it is
+                        if (isNaN(date)) {
+                            current_result_key_values.push(value);
+                        } else {
+                            current_result_key_values.push(date);
+                        }
                     } else {
-                        result.push({
-                            [key]: date
-                        })
+                        current_result_key_values.push(value);
                     }
-                }  else {
-                    result.push({
-                        [key]: value
-                    })
-                }
-            } else if (Array.isArray(value) && key == "tags") { // Only works with the column tags
-                const tagsString = `{${value.join(',')}}`;
-                result[key] = Raw(alias => `${alias} @> :tags`, { tags: tagsString });
-            } else if (typeof value == "object") {
-                let value_to_convert = value?.value;
-                if (key == "created_at" || key == "updated_at") {
-                    const date = new Date(value_to_convert) as any;
+                } else if (Array.isArray(value) && key == "tags") { // Only works with the column tags
+                    const tagsString = `{${value.join(',')}}`;
+                    current_result_key_values.push(Raw(alias => `${alias} @> :tags`, { tags: tagsString }));
+                } else if (typeof value == "object") {
+                    let final_value = value?.value;
+                    if (key == "created_at" || key == "updated_at") {
+                        const date = new Date(final_value) as any;
 
-                    // If date is NaN return the object as it is
-                    if (!isNaN(date)) {
-                        value_to_convert = date;
+                        // If date is NaN return the object as it is
+                        if (!isNaN(date)) {
+                            final_value = date;
+                        }
                     }
-                }
 
-                if (value.find_operator == "ILike") {
-                    result.push({
-                        [key]: ILike(value_to_convert)
-                    })
-                } else if (value.find_operator == "Like") {
-                    result.push({
-                        [key]: Like(value_to_convert)
-                    })
-                } else if (value.find_operator == "LessThan") {
-                    result.push({
-                            [key]: LessThan(value_to_convert)
-                        })
-                } else if (value.find_operator == "LessThanOrEqual") {
-                    result.push({
-                            [key]: LessThanOrEqual(value_to_convert)
-                        })
-                } else if (value.find_operator == "MoreThan") {
-                    result.push({
-                            [key]: MoreThan(value_to_convert)
-                        })
-                } else if (value.find_operator == "MoreThanOrEqual") {
-                    result.push({
-                            [key]: MoreThanOrEqual(value_to_convert)
-                        })
+                    if (value?.find_operator == "ILike") {
+                        final_value = ILike(final_value);
+                    } else if (value?.find_operator == "Like") {
+                        final_value = Like(final_value);
+                    } else if (value?.find_operator == "LessThan") {
+                        final_value = LessThan(final_value);
+                    } else if (value?.find_operator == "LessThanOrEqual") {
+                        final_value = LessThanOrEqual(final_value);
+                    } else if (value?.find_operator == "MoreThan") {
+                        final_value = MoreThan(final_value);
+                    } else if (value?.find_operator == "MoreThanOrEqual") {
+                        final_value = MoreThanOrEqual(final_value);
+                    }
+                        
+                    current_result_key_values.push(final_value);
                 } else {
-                    result.push({
-                        [key]: value_to_convert
-                    })
+                    current_result_key_values.push(value);
                 }
+            }
+            
+            if (current_result_key_values.length > 1) {
+                result.push({
+                    [key]: And(...current_result_key_values)
+                })
             } else {
                 result.push({
-                    [key]: value
+                    [key]: current_result_key_values[0]
                 })
             }
+
+            // if (typeof value == "string") {
+            //     if (key == "id") {
+            //         result.push({
+            //             [key]: Like("%" + value.replace(/[%_]/g, '\\$&'))
+            //         })
+            //     } else if (key == "created_at" || key == "updated_at") {
+            //         const date = new Date(value) as any;
+
+            //         // If date is NaN return the object as it is
+            //         if (isNaN(date)) {
+            //             result.push({
+            //                 [key]: value
+            //             })
+            //         } else {
+            //             result.push({
+            //                 [key]: date
+            //             })
+            //         }
+            //     }  else {
+            //         result.push({
+            //             [key]: value
+            //         })
+            //     }
+            // } else if (Array.isArray(value) && key == "tags") { // Only works with the column tags
+            //     const tagsString = `{${value.join(',')}}`;
+            //     result[key] = Raw(alias => `${alias} @> :tags`, { tags: tagsString });
+            // } else if (typeof value == "object") {
+            //     let value_to_convert = value?.value;
+            //     if (key == "created_at" || key == "updated_at") {
+            //         const date = new Date(value_to_convert) as any;
+
+            //         // If date is NaN return the object as it is
+            //         if (!isNaN(date)) {
+            //             value_to_convert = date;
+            //         }
+            //     }
+
+            //     if (value.find_operator == "ILike") {
+            //         result.push({
+            //             [key]: ILike(value_to_convert)
+            //         })
+            //     } else if (value.find_operator == "Like") {
+            //         result.push({
+            //             [key]: Like(value_to_convert)
+            //         })
+            //     } else if (value.find_operator == "LessThan") {
+            //         result.push({
+            //                 [key]: LessThan(value_to_convert)
+            //             })
+            //     } else if (value.find_operator == "LessThanOrEqual") {
+            //         result.push({
+            //                 [key]: LessThanOrEqual(value_to_convert)
+            //             })
+            //     } else if (value.find_operator == "MoreThan") {
+            //         result.push({
+            //                 [key]: MoreThan(value_to_convert)
+            //             })
+            //     } else if (value.find_operator == "MoreThanOrEqual") {
+            //         result.push({
+            //                 [key]: MoreThanOrEqual(value_to_convert)
+            //             })
+            //     } else {
+            //         result.push({
+            //             [key]: value_to_convert
+            //         })
+            //     }
+            // } else {
+            //     result.push({
+            //         [key]: value
+            //     })
+            // }
         }
     } else {
         result = {};
