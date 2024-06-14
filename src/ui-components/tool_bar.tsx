@@ -131,10 +131,19 @@ const ToolBar = (props) => {
             filter.id == id ? {...filter, [type == "columns" ? "field" : "operation"]: value } : filter
         ));
     }
+    const [ inputTimeout, setInputTimeout ] = useState<NodeJS.Timeout | null>(null);
     function setInputValueFilter(event) {
-        setFilters(filters_element => filters_element.map(filter => 
-            filter.id == event.target.dataset.id ? {...filter, value: event.target.value} : filter
-        ));
+        if (inputTimeout) {
+            clearTimeout(inputTimeout);
+        }
+
+        const newTimeout = setTimeout(() => {
+            setFilters(filters_element => filters_element.map(filter => 
+                filter.id == event.target.dataset.id ? {...filter, value: event.target.value} : filter
+            ));
+        }, 1500)
+
+        setInputTimeout(newTimeout);
     }
     function setDeleteFilter(event) {
         setFilters(filters => {

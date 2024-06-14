@@ -189,7 +189,7 @@ const ArticlePage = () => {
                                 </div>
                             )}
                         </div> :
-                        <p className="max-w-sm w-full text-center mt-4 font-medium">No articles yet</p>
+                        <p className="max-w-sm w-full text-center mt-4 font-medium">No articles found</p>
                         )
                     :
                     (<p className={`${typeof error === 'object' ? "text-start" : "text-center"} max-w-sm text-red-500 mt-4 font-medium`}>{
