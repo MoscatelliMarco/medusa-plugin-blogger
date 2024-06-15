@@ -2,7 +2,7 @@
   "name": "medusa-plugin-blogger",
   "version": "0.0.1",
   "description": "A blog implementation for MedusaJS",
-  "author": "Marco Moscatelli (https://marcomoscatelli.com/)",
+  "author": "Marco Moscatelli (https://marcomoscatelli.com)",
   "license": "MIT",
   "keywords": [
     "sqlite",
