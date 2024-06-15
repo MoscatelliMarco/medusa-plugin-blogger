@@ -58,7 +58,7 @@ const UploadArticleItem = (props) => {
             return props.setSubmitError("One or more images inside the article could not be deleted")
         }
         mutateDelete(
-            null, {
+            void 0, {
                 onSuccess: () => {
                     navigate("/a/articles");
                 }, 

@@ -360,7 +360,7 @@ const ArticleEditorPage = () => {
             mutatePost({...articleContent}, {onSuccess: successAutoSave, onError: errorAutoSave});
         } else {
             // Delete element
-            mutateDelete(null, {onSuccess: successAutoSave, onError: errorAutoSave})
+            mutateDelete(void 0, {onSuccess: successAutoSave, onError: errorAutoSave})
         }
     }
 

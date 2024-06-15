@@ -137,7 +137,7 @@ const ArticlePage = () => {
         }
         
         mutateDelete(
-            null, {
+            void 0, {
                 onSuccess: successDelete, 
                 onError: errorDelete
             }
