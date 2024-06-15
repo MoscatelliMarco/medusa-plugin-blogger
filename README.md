@@ -10,7 +10,8 @@
 1. [Introduction](#introduction)
 2. [Getting started](#getting-started)
 3. [API endpoints](#api-endpoints)
-4. [Architecture overview](#architecture-overview)
+4. [Storefront integration](#storefront-integration)
+5. [Architecture overview](#architecture-overview)
 
 ---
 
@@ -153,8 +154,84 @@ Modify an already existing blog article, this route requires the new `BlogArticl
 
 Delete an article having the id in the url.
 
-# Architecture overview
+# Storefront integration
+The way Medusa Plugin Blogger is developed makes it easy to integrate the plugin with the functionality of MedusaJS and your storefront, there are only two simple steps that you need to follow:
+1. Fetch `GET /store/blog/articles` with the conditions that you like (like shown above)
+2. You don't need to process further any part of the article because they are already in a form that can be displayed in HTML (for example `title` is already a string that can be displayed, `tags` is already an array that can be displayed) except for the body which you'll need to process into HTML, the editor used for the body is EditorJS which provides a clear JSON object for the body https://editorjs.io/saving-data/
 
+EditorJS divides the body into blocks, which you can easily iterate through and add your logic for every type of block that you use. Depending on what features of the editor you are going to use you can implement text highlighting, code blocks, images, headings, and much more... Everything is left up to your implementation!
+
+To make this more clear here is an example a body with the result after:
+```json
+{
+  "time": 1718394016975,
+  "blocks": [
+    {
+      "id": "bmQCD-2wEi",
+      "data": {
+        "text": "Databases play a crucial role\n in the development process, but how exactly do they work? In this \narticle, we’ll dive into the internal architecture of MongoDB, a popular\n no-SQL database, to provide a comprehensive explanation."
+      },
+      "type": "paragraph"
+    },
+    {
+      "id": "pbwAdmpETJ",
+      "data": {
+        "text": "Understanding how MongoDB works behind the scenes can be incredibly useful for developers looking to leverage its unique features and capabilities. So let’s dive in!"
+      },
+      "type": "paragraph"
+    },
+    {
+      "id": "-B3th1nCj5",
+      "data": {
+        "text": "Index",
+        "level": 1
+      },
+      "type": "header"
+    },
+    {
+      "id": "VkmuZ6qh-h",
+      "data": {
+        "items": [
+          {
+            "items": [],
+            "content": "What is a database?"
+          },
+          {
+            "items": [],
+            "content": "What is MongoDB?"
+          },
+          {
+            "items": [],
+            "content": "SQL vs no-SQL databases"
+          },
+          {
+            "items": [],
+            "content": "What is JSON?"
+          },
+          {
+            "items": [],
+            "content": "What the hell is BSON?"
+          },
+          {
+            "items": [],
+            "content": "What is Mongoose?"
+          }
+        ],
+        "style": "ordered"
+      },
+      "type": "list"
+    }
+  ],
+  "version": "2.29.1"
+}
+```
+
+This is the body of the article below:
+<div align="center">
+  <img src="https://imgur.com/tUku0si.png" alt="medusa-plugin-blogger rapresentation" />
+</div>
+
+# Architecture overview
 
 ## Dependencies
 
