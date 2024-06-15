@@ -52,7 +52,7 @@ const  plugins = {
 
 ### Update database schema
 
-Run the following command from the root of the project to udpate database with a new table required for storing product variant
+Run the following command from the root of the project to update database with a new table required for storing product variant
 
 ```bash
 npx medusa migrations run
@@ -64,7 +64,7 @@ A file service is required for this plugin to work.
   
 # API endpoints
 
-The max size of the body that an endpoint can receive is `10000000B` which is the equivalent to `10MB`, enough to store tens of academic papers inside an article object. This is enought to store approximately **1.600.000 words** In case you go over this threshold with your article, you will not be able to save it.
+The max size of the body that an endpoint can receive is `10000000B` which is the equivalent to `10MB`, enough to store tens of academic papers inside an article object. This is enough to store approximately **1.600.000 words** In case you go over this threshold with your article, you will not be able to save it.
 
 ## Store endpoints
 
@@ -116,18 +116,18 @@ This output may look strange at first, almost impossible to understand, but the 
   }
 }
 ```
-The supported find operators are: `ILike, Like, Raw, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual`, you can find the meaning of this operators in the [official typeorm documentation](https://orkhan.gitbook.io/typeorm/docs/find-options). If no supported find operator is found in the object the value will be searched as it is without throwing any error.
+The supported find operators are: `ILike, Like, Raw, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual`, you can find the meaning of these operators in the [official TypeORM documentation](https://orkhan.gitbook.io/typeorm/docs/find-options). If no supported find operator is found in the object the value will be searched as it is without throwing any error.
 
 In the `where` field if you search for `created_at` and `updated_at` key values, the plugin will automatically try to convert the string values into dates using `new Date(string_value)`, if no date is created than the value searched will be a string, even if it will not give any results because the type of `created_at` and `updated_at` is DATE, be mindful when using these two fields as you'll need to provide a correct date to receive an appropriate result.
 
-See the [Typeorm documentation](https://orkhan.gitbook.io/typeorm/docs/find-options) to understand better what every of this parameters does, keep in mind that the behavior of where is a little bit different from the one in the documentation, there are some things to take into consideration:
+See the [Typeorm documentation](https://orkhan.gitbook.io/typeorm/docs/find-options) to understand better what every of these parameters does, keep in mind that the behavior of where is a little bit different from the one in the documentation, there are some things to take into consideration:
 - The search works using an equal condition, for keys where the value is not `id` or `tags`, for example if you want to search for an element that has the title "I like pizza", the query parameters that you'll need to send in the request is `{ where { title: "I like pizza" } }`
 - IDs can be fetched with these two formats `blog_article_01HZHPGPY4MTR97EVX6FDDEXZE` and `01HZHPGPY4MTR97EVX6FDDEXZE`, both versions are valid
 - When adding a `tags` key to the body, they must be an array and the database will be searched for an element that has at least all the tags inside the `tags` value in the query parameters
 - We do not yet support searches over the body of the article
 - If you want an OR condition in your `where` value you need a list where you need to put all the separate conditions like this `[ {"title" : "Hello World!", "subtitle": "Awesome article"}, {"title" : "Example", "subtitle": "Awesome example"} ]`
 - If you want an AND condition in your `where` value for a specific field, you need to list all the conditions for that key, let's say you want a date range you can do it like this `{ "created_at": [{"find_operator": "LessThan","value": "2024-06-14"},{"find_operator": "MoreThanOrEqual","value": "2024-06-12"}]}`
-- The body is sanitised automaticcaly from SQL injections
+- The body is sanitized automatically from SQL injections
 
 ## Admin endpoints
 
@@ -167,7 +167,7 @@ Medusa-Plugin-Blogger relies on several key dependencies to provide a rich user 
 
 ## Blog article entity
 
-The BlogArticle entity requires only draft as a mandatory column, this is already handled by the store frontend but there might be need for a custom implementation if working with API routes directly. The choice of not making more columns mandatory was made because the implementation and use the plugin depends stricly on the frontend.
+The BlogArticle entity requires only draft as a mandatory column, this is already handled by the store frontend but there might be need for a custom implementation if working with API routes directly. The choice of not making more columns mandatory was made because the implementation and use the plugin depends strictly on your storefront.
 
 ```typescript
 @Entity()
